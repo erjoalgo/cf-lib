@@ -281,7 +281,8 @@ cf-fun-sym must be an existing function
   (->> (cf-service-instance-bindings cf-target service-guid)
        (map cf-extract-guid)
        (map (partial cf-service-instance-binding-delete
-                     cf-target service-guid))))
+                     cf-target service-guid))
+       dorun))
 
 (defn cf-service-instance-delete-force [cf-target service-guid]
   (do (cf-service-instance-bindings-delete cf-target service-guid)
