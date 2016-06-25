@@ -1,10 +1,9 @@
 (ns cf-lib.core
   (:require
-            ;[clojure.tools.cli :refer [parse-opts]]
-            ;[clojure.tools.logging :as log]
    [clj-http.client :as client]
    [clojure.data.json :as json]
-            )
+   [clojure.tools.logging :as log]
+   )
   (:gen-class))
 
 (defmacro get-chain [obj & accessors]
@@ -24,9 +23,6 @@
                {:host host
                 :port port}))))
 
-;(require '[clj-http.client :as client])
-;(require '[clojure.data.json :as json])
-
 (defn cf-login! [cf-target]
   (let [username (get cf-target :user)
         password (get cf-target :pass)
@@ -40,15 +36,18 @@
                                          :grant_type "password"}
                            :accept :json
                            :proxy-host (get proxy-map :host)
-                           :proxy-port (get proxy-map :port)})
+                           :proxy-port (get proxy-map :port)
+                           :insecure? true})
         body-json (json/read-str (get resp :body))
         oauth-token (get body-json "access_token")]
     (println (format "token obtained: %s"  oauth-token))
     (reset! (get cf-target :oauth-token) oauth-token)
     oauth-token))
 
-(defn cf-curl [cf-target & {:keys [method path http-client-args retry-count]
-                            :or {method :get}}]
+(defn cf-curl [cf-target path
+               & {:keys [method  http-client-args retry-count]
+                  :or {method :get}}]
+  (log/tracef "cf curl is %s %s\n" (name method) path)
   (when-not @(:oauth-token cf-target)
           (cf-login! cf-target))
   (assert @(get cf-target :oauth-token))
@@ -67,7 +66,7 @@
       (method-fun url (merge http-client-args additional-args))
       (catch clojure.lang.ExceptionInfo ex
         (clojure.stacktrace/print-stack-trace ex)
-        (printf "token may have expired. status: %s, %s. ...\n"
+        (log/infof "token may have expired. status: %s, %s. ...\n"
                 (-> ex .getData :status) (-> ex .getData :body))
         (if-not (and (-> ex .getData :status (= 401))
                      (or (not retry-count) (< retry-count 3)))
