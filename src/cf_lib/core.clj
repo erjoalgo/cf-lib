@@ -25,7 +25,7 @@
                {:host host
                 :port port}))))
 
-(defn cf-login! [cf-target]
+(defn cf-token [cf-target]
   (let [username (get cf-target :user)
         password (get cf-target :pass)
         login-endpoint (clojure.string/replace (get cf-target :api-endpoint)
@@ -43,45 +43,56 @@
         body-json (json/read-str (get resp :body))
         oauth-token (get body-json "access_token")]
     (println (format "token obtained: %s"  oauth-token))
-    (reset! (get cf-target :oauth-token) oauth-token)
+                                        ;(reset! (get cf-target :oauth-token) oauth-token)
     oauth-token))
 
 (defn cf-curl [cf-target path
-               & {:keys [method  http-client-args retry-count]
-                  :or {method :get}}]
-  (log/tracef "cf curl is %s %s\n" (name method) path)
-  (when-not @(:oauth-token cf-target)
-          (cf-login! cf-target))
-  (assert @(get cf-target :oauth-token))
-  (let [method-fun (case method
-                     :get client/get
-                     :post client/post
-                     :delete client/delete)
+               & {:keys [verb  http-client-args]
+                  :or {verb :get}}]
+  (log/tracef "cf curl is %s %s\n" (name verb) path)
+  (let [verb-fun (case verb
+                   :get client/get
+                   :post client/post
+                   :delete client/delete)
 
-        proxy-map (proxy-map (get cf-target :proxy))
-        oauth-token @(get cf-target :oauth-token)
-        additional-args {:headers {"Authorization" (str "bearer " oauth-token)}
-                         :proxy-host (get proxy-map :host)
-                         :proxy-port (get proxy-map :port)
-                         :insecure? true}
-        url (str (:api-endpoint cf-target) path)]
-    (try
-      (method-fun url (merge http-client-args additional-args))
-      (catch clojure.lang.ExceptionInfo ex
-        (clojure.stacktrace/print-stack-trace ex)
-        (log/infof "token may have expired. status: %s, %s. ...\n"
-                (-> ex .getData :status) (-> ex .getData :body))
-        (if-not (and (-> ex .getData :status (= 401))
-                     (or (not retry-count) (< retry-count 3)))
-          ;; did not expire or max retries reached
-          (throw ex)
-          ;; retry
-          (do (reset! (get cf-target :oauth-token) nil)
-              (println "token was reset" )
-              ;;TODO python **kwargs?
-              (cf-curl cf-target path :method method
-                       :http-client-args http-client-args
-                       :retry-count (inc (or retry-count 0)))))))))
+        url (str (:api-endpoint cf-target) path)
+
+        oauth-token @(:oauth-token cf-target)
+        proxy-map (proxy-map (:proxy cf-target))
+        proxy-args {:proxy-host (:host proxy-map)
+                    :proxy-port (:port proxy-map)
+                    :insecure? (:insecure? cf-target)}
+        ]
+
+    (loop [retry-count 2]
+      (do (assert (:oauth-token cf-target))
+          (when-not @(:oauth-token cf-target)
+            (cf-token cf-target)))
+      (let [oauth-token @(:oauth-token cf-target)
+            oauth-token-header {:headers {"Authorization"
+                                          (str "bearer " oauth-token)}}
+
+            (try
+              (verb-fun
+               url
+               (merge http-client-args proxy-args
+                      oauth-token-header)
+               (catch clojure.lang.ExceptionInfo ex
+                 (clojure.stacktrace/print-stack-trace ex)
+                 (if-not (and (-> ex .getData :status (= 401))
+                              (> retry-count 0))
+                   ;; did not expire or max retries reached
+                   (throw ex)
+                   ;; retry
+                   (do
+                     (log/infof "token may have expired. status: %s, %s. ...\n"
+                                (-> ex .getData :status)
+                                (-> ex .getData :body))
+                     (reset! (get cf-target :oauth-token) nil)
+                     (log/infof "token was reset" )
+                     (recur (dec retry-count))))))))))))
+
+
 
 (defn cf-depaginate-resources [cf-target resp]
   (->>
