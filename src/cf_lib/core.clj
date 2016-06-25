@@ -139,42 +139,66 @@ call"
 (cf-define-depaginating-functions
  [cf-apps "/v2/apps"]
  [cf-app-routes "/v2/apps/%s/routes"]
- [cf-app-service-instances "/v2/apps/%s/service_bindings"]
+ [cf-app-bindings "/v2/apps/%s/service_bindings"]
+
+ [cf-service-instances "/v2/service_instances"]
+ [cf-service-instance-bindings "/v2/service_instances/%s/service_bindings"]
+
  [cf-spaces "/v2/spaces"]
  [cf-space-apps "/v2/spaces/%s/apps"];TODO fix others using name instead of guid
  [cf-space-service-instances "/v2/spaces/%s/service_instances"]
- [cf-service-instances "/v2/service_instances"]
- [cf-service-instance-bindings "/v2/service_instances/%s/service_bindings"]
  )
 
-(defmacro cf-define-get-or-delete-functions
+(defn format-sym [fmt & strs-or-syms]
+  (->> strs-or-syms
+       (map name)
+       (apply format fmt)
+       symbol))
+
+(defmacro cf-define-get-delete-functions
   [& name-url-pairs]
   "for each (fun-name url) pair, define a function
 that takes a cf-target and a guid, and an optional :delete flag
 and retrieve or delete the specified resource"
-  (map (fn [[fun-name-sym url]]
-         (let [subs-count (-> (re-seq #"%s" url) count)
-               guid-syms (repeatedly subs-count #(gensym "guid-"))
-               cf-target-sym (gensym "cf-target-")
-               delete-sym (gensym "delete?")
-               arg-list `[~cf-target-sym ~@guid-syms {:keys [~delete-sym]}]
-               ]
+  (->> (map (fn [[cf-fun url]]
+              (let [subs-count (-> (re-seq #"%s" url) count)
+                    gen-guid-syms (fn []
+                                    (repeatedly subs-count #(gensym "guid-")))
 
-         `(def ~fun-name-sym ~arg-list
-            (let [url# (format ~url ~@guid-syms)
-                  method# (if ~delete-sym :delete :get)
-                  resp# (cf-curl cf-target# url# :method method#)]
-              (if delete#
-                resp#
-                (-> resp# :body json/read-str))))))
-       name-url-pairs))
+                    guid-syms-get (gen-guid-syms)
+                    guid-syms-delete (gen-guid-syms)
+
+                    cf-fun-delete (format-sym "%s-delete" cf-fun)
+
+                    cf-target-get (gensym "cf-target-")
+                    cf-target-delete (gensym "cf-target-")
+                    ]
+
+                [
+                 `(def ~cf-fun ~(apply vector
+                                           cf-target-get
+                                           guid-syms-get)
+                   (let [url# (format ~url ~@guid-syms-get)]
+                     (-> (cf-curl ~cf-target-get url#)
+                         :body json/read-str)))
+
+                `(def ~cf-fun-delete ~(apply vector
+                                                  cf-target-delete
+                                                  guid-syms-delete)
+                   (let [url# (format ~url ~@guid-syms-delete)]
+                     (-> (cf-curl ~cf-target-delete url# :method :delete))))
+                 ]
+                ))
+            name-url-pairs)
+       (reduce concat)))
 
 
 
-(cf-define-get-or-delete-functions
+(cf-define-get-delete-functions
  [cf-app "/v2/apps/%s"]
  [cf-space "/v2/spaces/%s"]
- [cf-service-binding "/v2/apps/%s/service_bindings/%s"]
+ [cf-app-binding "/v2/apps/%s/service_bindings/%s"]
+ [cf-service-instance-binding "/v2/apps/%s/service_bindings/%s"]
  [cf-service-instance "/v2/service_instances/%s"]
  [cf-service-plan "/v2/service_plans/%s"]
  [cf-service "/v2/services/%s"]
@@ -186,11 +210,7 @@ and retrieve or delete the specified resource"
 (defn cf-extract-guid [resp]
   (reduce get resp ["metadata" "guid"]))
 
-(defn format-sym [fmt & strs-or-syms]
-  (->> strs-or-syms
-       (map name)
-       (apply format fmt)
-       symbol))
+
 
 (defmacro cf-define-to-from-name-functions [& cf-fun-syms]
   "for each cf-fun, define functions,
@@ -237,55 +257,33 @@ cf-fun-sym must be an existing function
 
 
 
-(defn cf-app-service-instances-unbind [cf-target app-guid]
+(defn cf-app-bindings-delete [cf-target app-guid]
+  "delete all bindings for an app"
   (->>
-   (cf-app-service-instances cf-target app-guid)
+   (cf-app-bindings cf-target app-guid)
    (map cf-extract-guid)
-   (map (partial cf-app-unbind-service-instance cf-target app-guid))
-   dorun ))
+   (map (partial cf-app-binding-delete cf-target app-guid))
+   dorun))
 
 (defn cf-app-delete-force [cf-target app-guid]
   (do
-    (cf-app-unbind-service-instances cf-target app-guid)
+    (cf-app-bindings-delete cf-target app-guid)
     (cf-app-delete cf-target app-guid)))
 
+(defn cf-service-instance-bindings-delete [cf-target service-guid]
+  "delete all bindings for a service"
+  (->> (cf-service-bindings cf-target service-guid)
+       (map cf-extract-guid)
+       (map (partial cf-service-instance-binding-delete
+                     cf-target service-guid))))
 
-(defn cf-guid-to-space-name [cf-target space-guid]
-  (let [resp (cf-curl cf-target (format "/v2/spaces/%s/summary" space-guid))
-        resp-body (-> resp :body json/read-str)]
-    (get resp-body "name")))
-
-(defn cf-space-name-to-guid [cf-target space-name]
-  (let [space (cf-space-by-name cf-target space-name)]
-    (reduce get space ["metadata" "guid"])))
-
-(defn cf-delete-service-instance-bindings [cf-target service-guid]
-  (->> (cf-service-instance-bindings)
-       (map #(reduce get % ["entity" "app_guid"]))
-       (map #(cf-app-unbind-service-instance % service-guid))))
-
-(defn cf-service-plan-by-guid [cf-target guid]
-  (-> (cf-curl cf-target
-               (format "/v2/service_plans/%s"
-                       guid))
-      :body json/read-str))
+(defn cf-service-instance-delete-force [cf-target service-guid]
+  (do (cf-service-instance-bindings-delete cf-target service-guid)
+      (cf-service-instance-delete cf-target service-guid)))
 
 (defn cf-service-plan-guid-to-service-label [cf-target guid]
-  (->> (cf-service-plan-by-guid cf-target guid)
+  (->> (cf-service-plan cf-target guid)
        (#(reduce get % ["entity" "service_guid"]))
-       (cf-service-by-guid cf-target)
+       (cf-service cf-target)
        (#(reduce get % ["entity" "label"]))))
-
-(defn app-name-from-json [app-json]
-  (get-chain app-json "entity" "name"))
-
-(defn cf-app-names [cf-target]
-  (map app-name-from-json (cf-apps cf-target)))
-
-(defn cf-app-guid [cf-target app-name]
-  (let [apps (cf-apps cf-target)
-        found (filter (comp (partial = app-name) app-name-from-json)
-                      apps)]
-    (when-not (empty? found)
-            (get-chain (first found) "metadata" "guid"))))
 
