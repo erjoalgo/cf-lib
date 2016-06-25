@@ -100,7 +100,7 @@
   (loop [resp-body resp-body
          resources []
          page 0]
-    (printf "on page %s\n" page)
+    (log/tracef "on page %s\n" page)
     (if-not resp-body
       (apply concat resources)
       (let [resp-body (-> resp-body
