@@ -267,12 +267,13 @@ cf-fun-sym must be an existing function
    (map (partial cf-app-binding-delete cf-target app-guid))
    dorun))
 
-(defn cf-service-instance-bindings-delete [cf-target service-guid]
+(defn cf-service-instance-bindings-delete [cf-target service-instance-guid]
   "delete all bindings for a service"
-  (->> (cf-service-instance-bindings cf-target service-guid)
+  (->> (cf-service-instance-bindings cf-target service-instance-guid)
        (map cf-extract-guid)
-       (map (partial cf-service-instance-binding-delete
-                     cf-target service-guid))
+       (map #(cf-service-instance-binding-delete
+              %;;app name first
+              cf-target service-instance-guid))
        dorun))
 
 (defn cf-app-delete-force [cf-target app-guid]
