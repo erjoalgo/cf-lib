@@ -60,7 +60,8 @@
         oauth-token @(get cf-target :oauth-token)
         additional-args {:headers {"Authorization" (str "bearer " oauth-token)}
                          :proxy-host (get proxy-map :host)
-                         :proxy-port (get proxy-map :port)}
+                         :proxy-port (get proxy-map :port)
+                         :insecure? true}
         url (str (:api-endpoint cf-target) path)]
     (try
       (method-fun url (merge http-client-args additional-args))
