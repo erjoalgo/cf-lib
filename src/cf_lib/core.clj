@@ -281,9 +281,9 @@ cf-fun-sym must be an existing function
     (cf-app-bindings-delete cf-target app-guid)
     (cf-app-delete cf-target app-guid)))
 
-(defn cf-service-instance-delete-force [cf-target service-guid]
-  (do (cf-service-instance-bindings-delete cf-target service-guid)
-      (cf-service-instance-delete cf-target service-guid)))
+(defn cf-service-instance-delete-force [cf-target service-instance-guid]
+  (do (cf-service-instance-bindings-delete cf-target service-instance-guid)
+      (cf-service-instance-delete cf-target service-instance-guid)))
 
 (defn cf-service-plan-guid-to-service-label [cf-target guid]
   (->> (cf-service-plan cf-target guid)
