@@ -213,8 +213,6 @@ and retrieve or delete the specified resource"
 (defn cf-extract-guid [resp]
   (reduce get resp ["metadata" "guid"]))
 
-
-
 (defmacro cf-define-to-from-name-functions [& cf-fun-syms]
   "for each cf-fun, define functions,
 1. $(cf-fun)-by-name to lookup by name
@@ -261,8 +259,6 @@ cf-fun-sym must be an existing function
  cf-space
  cf-service-instance)
 
-
-
 (defn cf-app-bindings-delete [cf-target app-guid]
   "delete all bindings for an app"
   (->>
@@ -271,11 +267,6 @@ cf-fun-sym must be an existing function
    (map (partial cf-app-binding-delete cf-target app-guid))
    dorun))
 
-(defn cf-app-delete-force [cf-target app-guid]
-  (do
-    (cf-app-bindings-delete cf-target app-guid)
-    (cf-app-delete cf-target app-guid)))
-
 (defn cf-service-instance-bindings-delete [cf-target service-guid]
   "delete all bindings for a service"
   (->> (cf-service-instance-bindings cf-target service-guid)
@@ -283,6 +274,11 @@ cf-fun-sym must be an existing function
        (map (partial cf-service-instance-binding-delete
                      cf-target service-guid))
        dorun))
+
+(defn cf-app-delete-force [cf-target app-guid]
+  (do
+    (cf-app-bindings-delete cf-target app-guid)
+    (cf-app-delete cf-target app-guid)))
 
 (defn cf-service-instance-delete-force [cf-target service-guid]
   (do (cf-service-instance-bindings-delete cf-target service-guid)
@@ -293,4 +289,3 @@ cf-fun-sym must be an existing function
        (#(reduce get % ["entity" "service_guid"]))
        (cf-service cf-target)
        (#(reduce get % ["entity" "label"]))))
-
