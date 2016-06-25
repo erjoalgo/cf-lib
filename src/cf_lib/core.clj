@@ -83,9 +83,6 @@
                        :http-client-args http-client-args
                        :retry-count (inc (or retry-count 0)))))))))
 
-
-
-
 (defn cf-depaginate-resources [cf-target resp]
   (->>
    resp
@@ -119,7 +116,7 @@
   "for each (fun-name url), define a cf function
  that takes a cf-target and optionally a guid, and make a cf-curl
 call"
-  (map (fn [[fun-name-sym url]]
+  `(do ~@(map (fn [[fun-name-sym url]]
          (let [needs-format (.contains url "%s")
                cf-target-sym (gensym "cf-target-")
                guid-sym (gensym "guid-")
@@ -134,7 +131,7 @@ call"
                    (cf-curl ~cf-target-sym)
                    (cf-depaginate-resources ~cf-target-sym)))
            ))
-       name-url-pairs))
+       name-url-pairs)))
 
 (cf-define-depaginating-functions
  [cf-apps "/v2/apps"]
@@ -147,6 +144,8 @@ call"
  [cf-spaces "/v2/spaces"]
  [cf-space-apps "/v2/spaces/%s/apps"];TODO fix others using name instead of guid
  [cf-space-service-instances "/v2/spaces/%s/service_instances"]
+
+ [cf-services "/v2/spaces/%s/service_instances"]
  )
 
 (defn format-sym [fmt & strs-or-syms]
@@ -160,37 +159,41 @@ call"
   "for each (fun-name url) pair, define a function
 that takes a cf-target and a guid, and an optional :delete flag
 and retrieve or delete the specified resource"
-  (->> (map (fn [[cf-fun url]]
-              (let [subs-count (-> (re-seq #"%s" url) count)
-                    gen-guid-syms (fn []
-                                    (repeatedly subs-count #(gensym "guid-")))
+  `(do
+      ~@(->> (map (fn [[cf-fun url]]
+                  (let [subs-count (-> (re-seq #"%s" url) count)
+                        gen-guid-syms (fn []
+                                        (repeatedly subs-count
+                                                    #(gensym "guid-")))
 
-                    guid-syms-get (gen-guid-syms)
-                    guid-syms-delete (gen-guid-syms)
+                        guid-syms-get (gen-guid-syms)
+                        guid-syms-delete (gen-guid-syms)
 
-                    cf-fun-delete (format-sym "%s-delete" cf-fun)
+                        cf-fun-delete (format-sym "%s-delete" cf-fun)
 
-                    cf-target-get (gensym "cf-target-")
-                    cf-target-delete (gensym "cf-target-")
-                    ]
+                        cf-target-get (gensym "cf-target-")
+                        cf-target-delete (gensym "cf-target-")
+                        ]
 
-                [
-                 `(def ~cf-fun ~(apply vector
+                    [
+                     `(defn ~cf-fun ~(apply vector
                                            cf-target-get
                                            guid-syms-get)
-                   (let [url# (format ~url ~@guid-syms-get)]
-                     (-> (cf-curl ~cf-target-get url#)
-                         :body json/read-str)))
+                        (let [url# (format ~url ~@guid-syms-get)]
+                          (-> (cf-curl ~cf-target-get url#)
+                              :body json/read-str)))
 
-                `(def ~cf-fun-delete ~(apply vector
+                     `(defn ~cf-fun-delete ~(apply vector
                                                   cf-target-delete
                                                   guid-syms-delete)
-                   (let [url# (format ~url ~@guid-syms-delete)]
-                     (-> (cf-curl ~cf-target-delete url# :method :delete))))
-                 ]
-                ))
-            name-url-pairs)
-       (reduce concat)))
+                        (let [url# (format ~url ~@guid-syms-delete)]
+                          (-> (cf-curl ~cf-target-delete url#
+                                       :method :delete))))
+                     ]
+                    ))
+                name-url-pairs)
+           (reduce concat)
+           do)))
 
 
 
@@ -220,40 +223,43 @@ and retrieve or delete the specified resource"
 
 cf-fun-sym must be an existing function
 "
-  (->> (map (fn [cf-fun-sym]
-              (let [find-by-name-sym (format-sym "%s-by-name" cf-fun-sym)
-                    cf-fun-sym-plural (format-sym "%ss" cf-fun-sym)
-                    to-name-sym (format-sym "%s-name" cf-fun-sym)
-                    name-to-guid-sym (format-sym "%s-name-to-guid" cf-fun-sym)
-                    ]
-               [
-                `(defn ~to-name-sym [cf-target# guid#]
-                   (-> (~cf-fun-sym cf-target# guid#)
-                       (cf-extract-name)))
+  `(do ~@(->> (map (fn [cf-fun-sym]
+                     (let [find-by-name-sym (format-sym "%s-by-name" cf-fun-sym)
+                           cf-fun-sym-plural (format-sym "%ss" cf-fun-sym)
+                           to-name-sym (format-sym "%s-name" cf-fun-sym)
+                           name-to-guid-sym (format-sym "%s-name-to-guid"
+                                                        cf-fun-sym)
+                           ]
+                       [
+                        `(defn ~to-name-sym [cf-target# guid#]
+                           (-> (~cf-fun-sym cf-target# guid#)
+                               (cf-extract-name)))
 
-                `(defn ~find-by-name-sym [cf-target# name#]
-                   (let [matches#
-                         (->> (~cf-fun-sym-plural cf-target#)
-                             (filter (comp (partial = name#)
-                                           cf-extract-name)))
+                        `(defn ~find-by-name-sym [cf-target# name#]
+                           (let [matches#
+                                 (->> (~cf-fun-sym-plural cf-target#)
+                                      (filter (comp (partial = name#)
+                                                    cf-extract-name)))
+                                 ]
+                             (when (rest matches#)
+                               (log/warnf
+                                ~(format
+                                  "multiple matches for %s with name: %%s"
+                                  cf-fun-sym) name#))
+                             (first matches#)))
+
+                        `(defn ~name-to-guid-sym [cf-target# name#]
+                           (-> (~find-by-name-sym cf-target# name#)
+                               cf-extract-guid))
                         ]
-                    (when (rest matches#)
-                      (log/warnf ~(format
-                                    "multiple matches for %s with name: %%s"
-                                    cf-fun-sym) name#))
-                    (first matches#)))
-                `(def ~name-to-guid-sym [cf-target# name#]
-                   (-> (~find-by-name-sym cf-target# name#)
-                       cf-extract-guid))
-                ]
-               ))
-           cf-fun-syms)
-      (reduce concat)))
+                       ))
+                   cf-fun-syms)
+              (reduce concat))))
 
 (cf-define-to-from-name-functions
- [cf-app
-  cf-space
-  cf-service])
+ cf-app
+ cf-space
+ cf-service-instance)
 
 
 
@@ -272,7 +278,7 @@ cf-fun-sym must be an existing function
 
 (defn cf-service-instance-bindings-delete [cf-target service-guid]
   "delete all bindings for a service"
-  (->> (cf-service-bindings cf-target service-guid)
+  (->> (cf-service-instance-bindings cf-target service-guid)
        (map cf-extract-guid)
        (map (partial cf-service-instance-binding-delete
                      cf-target service-guid))))
