@@ -76,7 +76,7 @@
           (do (reset! (get cf-target :oauth-token) nil)
               (println "token was reset" )
               ;;TODO python **kwargs?
-              (cf-curl cf-target :method method :path path
+              (cf-curl cf-target path :method method
                        :http-client-args http-client-args
                        :retry-count (inc (or retry-count 0)))))))))
 
