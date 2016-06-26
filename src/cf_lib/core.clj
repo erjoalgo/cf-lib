@@ -158,10 +158,15 @@ call"
  [cf-service-instance-bindings "/v2/service_instances/%s/service_bindings"]
 
  [cf-spaces "/v2/spaces"]
- [cf-space-apps "/v2/spaces/%s/apps"];TODO fix others using name instead of guid
+ [cf-space-apps "/v2/spaces/%s/apps"]
  [cf-space-service-instances "/v2/spaces/%s/service_instances"]
 
- [cf-services "/v2/spaces/%s/service_instances"]
+ [cf-space-services "/v2/spaces/%s/services"]
+ [cf-space-service-brokers "/v2/spaces/%s/service_brokers"]
+
+ [cf-routes "/v2/routes"]
+ [cf-services "/v2/services"]
+ [cf-service-brokers "/v2/service_brokers"]
 
  [cf-users "/v2/users"]
  [cf-orgs "/v2/orgs"]
