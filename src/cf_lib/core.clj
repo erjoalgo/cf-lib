@@ -175,9 +175,9 @@ call"
 
 (defmacro cf-define-get-delete-functions
   [& name-url-pairs]
-  "for each (fun-name url) pair, define a function
-that takes a cf-target and a guid, and an optional :delete flag
-and retrieve or delete the specified resource"
+  "for each (fun-name url) pair, define
+1. a getter function that takes a cf-target and a guid,
+2. a deleter for the same resource"
   `(do
       ~@(->> (map (fn [[cf-fun url]]
                   (let [subs-count (-> (re-seq #"%s" url) count)
@@ -207,7 +207,7 @@ and retrieve or delete the specified resource"
                                                   guid-syms-delete)
                         (let [url# (format ~url ~@guid-syms-delete)]
                           (-> (cf-curl ~cf-target-delete url#
-                                       :method :delete))))
+                                       :verb :delete))))
                      ]
                     ))
                 name-url-pairs)
