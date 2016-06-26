@@ -205,6 +205,7 @@ and retrieve or delete the specified resource"
  [cf-service-instance "/v2/service_instances/%s"]
  [cf-service-plan "/v2/service_plans/%s"]
  [cf-service "/v2/services/%s"]
+ [cf-route "/v2/routes/%s"]
  )
 
 (defn cf-extract-name [resp]
@@ -279,7 +280,8 @@ cf-fun-sym must be an existing function
 (defn cf-app-delete-force [cf-target app-guid]
   (do
     (cf-app-bindings-delete cf-target app-guid)
-    (cf-app-delete cf-target app-guid)))
+    (cf-app-delete cf-target app-guid)
+    (cf-app-routes-delete cf-target app-guid)))
 
 (defn cf-service-instance-delete-force [cf-target service-instance-guid]
   (do (cf-service-instance-bindings-delete cf-target service-instance-guid)
@@ -290,3 +292,10 @@ cf-fun-sym must be an existing function
        (#(reduce get % ["entity" "service_guid"]))
        (cf-service cf-target)
        (#(reduce get % ["entity" "label"]))))
+
+
+(defn cf-app-routes-delete [cf-target app-guid]
+  (->> (cf-app-routes cf-target app-guid)
+       (map cf-extract-guid)
+       (map (partial cf-route-delete cf-target))
+       dorun))
