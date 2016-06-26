@@ -38,13 +38,13 @@
                                          :password password
                                          :grant_type "password"}
                            :accept :json
-    (println (format "token obtained: %s"  oauth-token))
                            :proxy-host (:host proxy-map)
                            :proxy-port (:port proxy-map)
                            :insecure? (:insecure? cf-target)})
         body-json (json/read-str (:body resp))
         oauth-token (-> resp :body json/read-str
                         (get "access_token"))]
+    (log/infof format "token obtained: %s"  oauth-token)
     ;;(reset! (get cf-target :oauth-token) oauth-token)
     oauth-token))
 
