@@ -87,8 +87,10 @@
     (try (verb-fun url
                    (merge http-client-args proxy-args headers))
          (catch Exception ex
+           ;(clojure.stacktrace/print-stack-trace ex)
            (if-not
                (and (< retry-count 2)
+                    ;;TODO check if has .getData method
                     (-> ex .getData :status (= 401)))
              (throw ex)
              (cf-curl cf-target path
