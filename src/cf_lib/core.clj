@@ -81,7 +81,7 @@
                       (->> (token-for-cf-target! cf-target
                                                  :force (> retry-count 0))
                            (str "bearer "))}
-        headers {:headers (conj (:headers http-client-args)
+        headers {:headers (merge (:headers http-client-args)
                                 token-header)}
         ]
     (try (verb-fun url
