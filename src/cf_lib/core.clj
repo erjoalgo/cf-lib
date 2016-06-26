@@ -26,24 +26,26 @@
                 :port port}))))
 
 (defn cf-token [cf-target]
-  (let [username (get cf-target :user)
-        password (get cf-target :pass)
-        login-endpoint (clojure.string/replace (get cf-target :api-endpoint)
-                                               #"api" "login")
-        proxy-map (proxy-map (get cf-target :proxy))
+  (let [username (:user cf-target)
+        password (:pass cf-target)
+        login-endpoint (clojure.string/replace
+                        (:api-endpoint cf-target)
+                        #"api" "login")
+        proxy-map (proxy-map (:proxy cf-target))
         resp (client/post (str login-endpoint "/oauth/token")
                           {:basic-auth ["cf" ""]
                            :form-params {:username username
                                          :password password
                                          :grant_type "password"}
                            :accept :json
-                           :proxy-host (get proxy-map :host)
-                           :proxy-port (get proxy-map :port)
                            :insecure? true})
-        body-json (json/read-str (get resp :body))
-        oauth-token (get body-json "access_token")]
     (println (format "token obtained: %s"  oauth-token))
-                                        ;(reset! (get cf-target :oauth-token) oauth-token)
+                           :proxy-host (:host proxy-map)
+                           :proxy-port (:port proxy-map)
+        body-json (json/read-str (:body resp))
+        oauth-token (-> resp :body json/read-str
+                        (get "access_token"))]
+    ;;(reset! (get cf-target :oauth-token) oauth-token)
     oauth-token))
 
 (defn cf-curl [cf-target path
