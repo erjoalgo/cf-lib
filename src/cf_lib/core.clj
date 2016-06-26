@@ -292,8 +292,9 @@ cf-fun-sym must be an existing function
   (->> (cf-service-instance-bindings cf-target service-instance-guid)
        (map cf-extract-guid)
        (map #(cf-service-instance-binding-delete
+              cf-target
               %;;app name first
-              cf-target service-instance-guid))
+              service-instance-guid))
        dorun))
 
 (defn cf-app-routes-delete [cf-target app-guid]
