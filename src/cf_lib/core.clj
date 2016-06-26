@@ -238,6 +238,9 @@ call"
 (defn cf-extract-guid [resp]
   (reduce get resp ["metadata" "guid"]))
 
+(defn cf-get-entity-field [field resp]
+  (reduce get resp ["entity" field]))
+
 (defmacro cf-define-to-from-name-functions [& cf-fun-syms]
   "for each cf-fun, define functions,
 1. $(cf-fun)-by-name to lookup by name
@@ -320,7 +323,7 @@ cf-fun-sym must be an existing function
 
 (defn cf-service-plan-guid-to-service-label [cf-target guid]
   (->> (cf-service-plan cf-target guid)
-       (#(reduce get % ["entity" "service_guid"]))
+       (cf-get-entity-field "service_guid")
        (cf-service cf-target)
-       (#(reduce get % ["entity" "label"]))))
+       (cf-get-entity-field "label")))
 
