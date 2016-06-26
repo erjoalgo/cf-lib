@@ -291,6 +291,12 @@ cf-fun-sym must be an existing function
               cf-target service-instance-guid))
        dorun))
 
+(defn cf-app-routes-delete [cf-target app-guid]
+  (->> (cf-app-routes cf-target app-guid)
+       (map cf-extract-guid)
+       (map (partial cf-route-delete cf-target))
+       dorun))
+
 (defn cf-app-delete-force [cf-target app-guid]
   (do
     (cf-app-bindings-delete cf-target app-guid)
@@ -307,8 +313,3 @@ cf-fun-sym must be an existing function
        (cf-service cf-target)
        (#(reduce get % ["entity" "label"]))))
 
-(defn cf-app-routes-delete [cf-target app-guid]
-  (->> (cf-app-routes cf-target app-guid)
-       (map cf-extract-guid)
-       (map (partial cf-route-delete cf-target))
-       dorun))
