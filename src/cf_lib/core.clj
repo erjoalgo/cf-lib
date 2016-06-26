@@ -146,6 +146,9 @@ call"
  [cf-space-service-instances "/v2/spaces/%s/service_instances"]
 
  [cf-services "/v2/spaces/%s/service_instances"]
+
+ [cf-users "/v2/users"]
+ [cf-orgs "/v2/orgs"]
  )
 
 (defn format-sym [fmt & strs-or-syms]
@@ -292,7 +295,6 @@ cf-fun-sym must be an existing function
        (#(reduce get % ["entity" "service_guid"]))
        (cf-service cf-target)
        (#(reduce get % ["entity" "label"]))))
-
 
 (defn cf-app-routes-delete [cf-target app-guid]
   (->> (cf-app-routes cf-target app-guid)
