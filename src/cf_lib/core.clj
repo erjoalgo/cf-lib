@@ -109,6 +109,7 @@
                (when next-url
                  (cf-curl cf-target next-url))))
    (take-while (comp not nil?))
+   (map (comp #(get % "resources") json/read-str :body))
    (reduce concat)))
 
 (defn cf-depaginate-resources [cf-target resp-body]
