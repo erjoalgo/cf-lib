@@ -48,6 +48,18 @@
     ;;(reset! (get cf-target :oauth-token) oauth-token)
     oauth-token))
 
+(def cf-target-to-token
+  "map cf targets to tokens accros threads"
+  (ref {}))
+
+(defn token-for-cf-target! [cf-target {:keys [force]}]
+  "returns a token for cf-target. if no token exists or if
+:force is true obtain a new token and associate it with target"
+  (let [existing (and (not force)
+                      (get cf-target-to-token cf-target))]
+    ;;TODO ensure anyone reading ref is BLOCKED until token is obtained?
+    (or existing (dosync (ref-set cf-target-to-token
+                                  (cf-token cf-target))))))
 (defn cf-curl [cf-target path
                & {:keys [verb  http-client-args]
                   :or {verb :get}}]
