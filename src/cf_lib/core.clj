@@ -44,7 +44,7 @@
         body-json (json/read-str (:body resp))
         oauth-token (-> resp :body json/read-str
                         (get "access_token"))]
-    (log/infof format "token obtained: %s"  oauth-token)
+    (log/infof "token obtained: %s"  oauth-token)
     ;;(reset! (get cf-target :oauth-token) oauth-token)
     oauth-token))
 
@@ -52,7 +52,7 @@
   "map cf targets to tokens accros threads"
   (ref {}))
 
-(defn token-for-cf-target! [cf-target {:keys [force]}]
+(defn token-for-cf-target! [cf-target & {:keys [force]}]
   "returns a token for cf-target. if no token exists or if
 :force is true obtain a new token and associate it with target"
   (let [existing (and (not force)
