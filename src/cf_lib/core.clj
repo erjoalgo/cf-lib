@@ -104,21 +104,20 @@
              (throw ex)
              (cf-curl cf-target path
                       :verb verb
-                      :http-client-args http-client-args
+                      :http-client-args extra-http-client-args
                       :retry-count (inc (or retry-count 0))))))))
 
 (defn cf-depaginate-resources [cf-target resp]
   (->>
    resp
-   (iterate #(let [next-url
-                   (-> %
-                       :body
-                       json/read-str
-                       (get  "next_url"))]
-               (when next-url
-                 (cf-curl cf-target next-url))))
+   (iterate (comp (fnil (comp
+                         json/read-str
+                         :body
+                         (partial cf-curl cf-target)) nil)
+                  (get resp "next_url"))
+            (-> resp json/read-str :body))
    (take-while (comp not nil?))
-   (map (comp #(get % "resources") json/read-str :body))
+   (map #(get % "resources"))
    (reduce concat)))
 
 (defn cf-depaginate-resources [cf-target resp-body]
