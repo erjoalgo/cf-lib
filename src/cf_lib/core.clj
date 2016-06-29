@@ -331,7 +331,7 @@ cf-fun-sym must be an existing function
 
 (defn cf-service-plan-guid-to-service-label [cf-target guid]
   (->> (cf-service-plan cf-target guid)
-       (cf-get-entity-field "service_guid")
+       (cf-extract-entity-field "service_guid")
        (cf-service cf-target)
-       (cf-get-entity-field "label")))
+       (cf-extract-entity-field "label")))
 
