@@ -376,3 +376,20 @@ cf-fun-sym must be an existing function
      cf-target
     ;(vector
      name service-plan-guid space-guid :payload payload)))
+
+(defn cf-get-envs [cf-target app-guid]
+  (-> (cf-curl cf-target
+               (format "/v2/apps/%s/env" app-guid))
+      :body json/read-str))
+
+(defn cf-set-envs [cf-target app-guid envs]
+  (let [current-envs (cf-get-envs cf-target app-guid)]
+    (cf-curl
+     cf-target
+     (format "/v2/apps/%s" app-guid)
+     :verb :PUT
+     :body {:environment_json (merge current-envs envs)})))
+
+(defn cf-app-vcap-services [cf-target app-guid]
+  (-> (cf-get-envs cf-target app-guid)
+      (get "system_env_json")))
