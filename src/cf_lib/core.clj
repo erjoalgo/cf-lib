@@ -18,6 +18,8 @@
 ;;TODO fill in nil atom on the struct
 
 (defn proxy-map [proxy]
+  "make sure proxy is a {:host host :port port} map
+and not a string like http://my-proxy:8080"
   (when proxy
     (condp instance? proxy
       java.util.Map proxy
