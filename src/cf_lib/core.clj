@@ -173,7 +173,10 @@ call"
  [cf-space-service-brokers "/v2/spaces/%s/service_brokers"]
 
  [cf-routes "/v2/routes"]
+ [cf-route-apps "/v2/routes/%s/apps"]
+
  [cf-services "/v2/services"]
+ [cf-service-plans "/v2/services/%s/service_plans"]
  [cf-service-brokers "/v2/service_brokers"]
 
  [cf-users "/v2/users"]
@@ -220,7 +223,7 @@ call"
                                                   guid-syms-delete)
                         (let [url# (format ~url ~@guid-syms-delete)]
                           (-> (cf-curl ~cf-target-delete url#
-                                       :verb :delete))))
+                                       :verb :DELETE))))
                      ]
                     ))
                 name-url-pairs)
@@ -233,7 +236,7 @@ call"
  [cf-app "/v2/apps/%s"]
  [cf-space "/v2/spaces/%s"]
  [cf-app-binding "/v2/apps/%s/service_bindings/%s"]
- [cf-service-instance-binding "/v2/apps/%s/service_bindings/%s"]
+ [cf-service-binding "/v2/service_bindings/%s"]
  [cf-service-instance "/v2/service_instances/%s"]
  [cf-service-plan "/v2/service_plans/%s"]
  [cf-service "/v2/services/%s"]
@@ -246,7 +249,7 @@ call"
 (defn cf-extract-guid [resp]
   (reduce get resp ["metadata" "guid"]))
 
-(defn cf-get-entity-field [field resp]
+(defn cf-extract-entity-field [field resp]
   (reduce get resp ["entity" field]))
 
 (defmacro cf-define-to-from-name-functions [& cf-fun-syms]
