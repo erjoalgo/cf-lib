@@ -337,3 +337,42 @@ cf-fun-sym must be an existing function
        (cf-service cf-target)
        (cf-extract-entity-field "label")))
 
+(defn cf-service-by-label [cf-target service-label]
+  (->> (cf-services cf-target)
+      (filter (comp (partial = service-label)
+                    (partial cf-extract-entity-field "label")))
+      first))
+
+(defn cf-service-instance-create [cf-target name service-plan-guid space-guid
+                                  & {:keys [payload]}]
+  (cf-curl cf-target "/v2/service_instances" :verb :POST
+           :body {"name" name
+                  "service_plan_guid" service-plan-guid
+                  "space_guid" space-guid
+                  "parameters" payload}))
+
+;;redefine this function: it makes no sense to search across all plans by name
+;; ie a lot of duplicates, "Free", "shared-nr", etc
+(defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
+  (->> (cf-service-plans cf-target service-guid)
+       (filter (comp (partial = service-plan-name)
+                     cf-extract-name))
+       first))
+
+(defn cf-service-instance-create-human [cf-target name
+                                        service-label
+                                        service-plan-name
+                                        space-name
+                                        & {:keys [payload]}]
+  (let [service (cf-service-by-label cf-target service-label)
+        service-guid (cf-extract-guid service)
+        service-plan (cf-service-plan-by-name
+                      cf-target
+                      service-guid
+                      service-plan-name)
+        service-plan-guid (cf-extract-guid service-plan)
+        space-guid (cf-space-name-to-guid cf-target space-name)]
+    (cf-service-instance-create
+     cf-target
+    ;(vector
+     name service-plan-guid space-guid :payload payload)))
