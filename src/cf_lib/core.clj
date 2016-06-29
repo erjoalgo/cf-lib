@@ -310,10 +310,7 @@ cf-fun-sym must be an existing function
   "delete all bindings for a service"
   (->> (cf-service-instance-bindings cf-target service-instance-guid)
        (map cf-extract-guid)
-       (map #(cf-service-instance-binding-delete
-              cf-target
-              %;;app name first
-              service-instance-guid))
+       (map #(cf-service-binding-delete cf-target %))
        dorun))
 
 (defn cf-app-routes-delete [cf-target app-guid]
