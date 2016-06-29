@@ -60,34 +60,43 @@
     ;;TODO ensure anyone reading ref is BLOCKED until token is obtained?
     (or existing (dosync (ref-set cf-target-to-token
                                   (cf-token cf-target))))))
+
 (defn cf-curl [cf-target path
-               & {:keys [verb http-client-args retry-count]
-                                 :or {verb :get
-                                      retry-count 0}}]
+               & {:keys [verb
+                         query-params
+                         body
+                         extra-http-client-args retry-count]
+                  :or {verb :GET
+                       retry-count 0}}]
   (log/tracef "cf curl is %s %s\n" (name verb) path)
   (let [verb-fun (case verb
-                   :get client/get
-                   :post client/post
-                   :delete client/delete)
+                   :GET client/get
+                   :POST client/post
+                   :DELETE client/delete
+                   :PUT client/put)
 
         url (str (:api-endpoint cf-target) path)
 
         proxy-map (proxy-map (:proxy cf-target))
-        proxy-args {:proxy-host (:host proxy-map)
-                    :proxy-port (:port proxy-map)
-                    :insecure? (:insecure? cf-target)}
-
         token-header {"Authorization"
                       (->> (token-for-cf-target! cf-target
                                                  :force (> retry-count 0))
                            (str "bearer "))}
-        headers {:headers (merge (:headers http-client-args)
-                                token-header)}
+
+        update-in-args {[:headers] (partial merge token-header)
+                        [:body] (fnil identity (json/write-str body))
+                        [:query-params] (partial merge query-params)
+                        [:proxy-host] (fnil identity (:host proxy-map))
+                        [:proxy-port] (fnil identity (:port proxy-map))
+                        [:insecure?] (fnil identity (:insecure? cf-target))}
+        complete-client-args (reduce-kv update-in extra-http-client-args
+                                        update-in-args)
         ]
-    (try (verb-fun url
-                   (merge http-client-args proxy-args headers))
+    '(printf "complete client args: %s %s %s\n"
+            verb url
+            complete-client-args)
+    (try (verb-fun url complete-client-args)
          (catch Exception ex
-           ;(clojure.stacktrace/print-stack-trace ex)
            (if-not
                (and (< retry-count 2)
                     ;;TODO check if has .getData method
