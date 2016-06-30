@@ -180,7 +180,7 @@ call"
  [cf-service-brokers "/v2/service_brokers"]
 
  [cf-users "/v2/users"]
- [cf-orgs "/v2/orgs"]
+ [cf-orgs "/v2/organizations"]
  )
 
 (defn format-sym [fmt & strs-or-syms]
@@ -241,6 +241,7 @@ call"
  [cf-service-plan "/v2/service_plans/%s"]
  [cf-service "/v2/services/%s"]
  [cf-route "/v2/routes/%s"]
+ [cf-org "/v2/organizations/%s"]
  )
 
 (defn cf-extract-name [resp]
