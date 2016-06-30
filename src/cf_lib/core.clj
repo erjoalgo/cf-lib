@@ -56,10 +56,10 @@ and not a string like http://my-proxy:8080"
   (let [existing (and (not force)
                       (get @cf-target-to-token cf-target))]
     ;;TODO ensure anyone reading ref is BLOCKED until token is obtained?
-    (or existing (get (swap! cf-target-to-token
+    @(or existing (get (swap! cf-target-to-token
                         assoc
                         cf-target
-                        (cf-token cf-target)) cf-target))))
+                        (delay (cf-token cf-target))) cf-target))))
 
 (defn cf-curl [cf-target path
                & {:keys [verb
