@@ -136,6 +136,30 @@ and not a string like http://my-proxy:8080"
                (conj resources new-resources)
                (inc page))))))
 
+(defn cf-pdepaginate-resources [cf-target first-resp]
+  "parallel depagination"
+  (let [first-resp-json (-> first-resp :body json/read-str)
+        total-pages (get first-resp-json "total_pages")
+        sample-next-url (get first-resp-json "next_url")
+        ;ith-page-url #(clojure.string/replace
+                       ;sample-next-url
+                       ;#"page=([0-9]+)"
+                       ;(format "page=%d" %))
+        page-indices (range 2 (inc total-pages))
+        pages (->> page-indices
+                   (pmap (comp
+                          json/read-str
+                          :body
+                          #(cf-curl cf-target
+                                    sample-next-url
+                                    :query-params {:page %}))))
+
+        all-pages (conj pages first-resp)
+        ]
+    (->> all-pages
+         (map (comp #(get % "resources")))
+         (apply concat))))
+
 (defmacro cf-define-depaginating-functions [& name-url-pairs]
   "for each (fun-name url), define a cf function
  that takes a cf-target and optionally a guid, and make a cf-curl
@@ -153,7 +177,7 @@ call"
            `(defn ~fun-name-sym ~arg-list
               (->> ~url-form
                    (cf-curl ~cf-target-sym)
-                   (cf-depaginate-resources ~cf-target-sym)))
+                   (cf-pdepaginate-resources ~cf-target-sym)))
            ))
        name-url-pairs)))
 
