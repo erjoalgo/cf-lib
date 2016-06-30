@@ -381,7 +381,6 @@ deleter deletes a single resource
         space-guid (cf-space-name-to-guid cf-target space-name)]
     (cf-service-instance-create
      cf-target
-    ;(vector
      name service-plan-guid space-guid :payload payload)))
 
 (defn cf-get-envs [cf-target app-guid]
@@ -390,6 +389,7 @@ deleter deletes a single resource
       :body json/read-str))
 
 (defn cf-set-envs [cf-target app-guid envs]
+  "update existing app envs with envs"
   (let [current-envs (cf-get-envs cf-target app-guid)]
     (cf-curl
      cf-target
