@@ -358,18 +358,6 @@ deleter deletes a single resource
   (do (cf-service-instance-bindings-delete cf-target service-instance-guid)
       (cf-service-instance-delete cf-target service-instance-guid)))
 
-(defn cf-service-plan-guid-to-service-label [cf-target guid]
-  (->> (cf-service-plan cf-target guid)
-       (cf-extract-entity-field "service_guid")
-       (cf-service cf-target)
-       (cf-extract-entity-field "label")))
-
-(defn cf-service-by-label [cf-target service-label]
-  (->> (cf-services cf-target)
-      (filter (comp (partial = service-label)
-                    (partial cf-extract-entity-field "label")))
-      first))
-
 (defn cf-service-instance-create [cf-target name service-plan-guid space-guid
                                   & {:keys [payload]}]
   (cf-curl cf-target "/v2/service_instances" :verb :POST
@@ -377,14 +365,6 @@ deleter deletes a single resource
                   "service_plan_guid" service-plan-guid
                   "space_guid" space-guid
                   "parameters" payload}))
-
-;;redefine this function: it makes no sense to search across all plans by name
-;; ie a lot of duplicates, "Free", "shared-nr", etc
-(defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
-  (->> (cf-service-plans cf-target service-guid)
-       (filter (comp (partial = service-plan-name)
-                     cf-extract-name))
-       first))
 
 (defn cf-service-instance-create-human [cf-target name
                                         service-label
@@ -420,6 +400,20 @@ deleter deletes a single resource
 (defn cf-app-vcap-services [cf-target app-guid]
   (-> (cf-get-envs cf-target app-guid)
       (get "system_env_json")))
+
+(defn cf-service-by-label [cf-target service-label]
+  (->> (cf-services cf-target)
+      (filter (comp (partial = service-label)
+                    (partial cf-extract-entity-field "label")))
+      first))
+
+;;redefine this function: it makes no sense to search across all services
+;;for a plan by given name, ie a lot of duplicates, "Free", "Tiered", etc
+(defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
+  (->> (cf-service-plans cf-target service-guid)
+       (filter (comp (partial = service-plan-name)
+                     cf-extract-name))
+       first))
 
 (defn cf-service-instances-by-service-label [cf-target service-label]
   (let [service-guid (-> (cf-service-by-label cf-target service-label)
