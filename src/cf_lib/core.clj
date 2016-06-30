@@ -392,3 +392,13 @@ cf-fun-sym must be an existing function
 (defn cf-app-vcap-services [cf-target app-guid]
   (-> (cf-get-envs cf-target app-guid)
       (get "system_env_json")))
+
+(defn cf-service-instances-by-service-label [cf-target service-label]
+  (let [service-guid (-> (cf-service-by-label cf-target service-label)
+                    cf-extract-guid)
+        service-plan-guids (->> (cf-service-plans cf-target service-guid)
+                                (map cf-extract-guid))]
+    (->> (cf-service-instances cf-target)
+         (filter (comp (partial contains? (set service-plan-guids))
+                       (partial cf-extract-entity-field
+                                "service_plan_guid"))))))
