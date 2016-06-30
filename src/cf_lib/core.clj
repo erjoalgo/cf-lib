@@ -154,7 +154,7 @@ and not a string like http://my-proxy:8080"
                                     sample-next-url
                                     :query-params {:page %}))))
 
-        all-pages (conj pages first-resp)
+        all-pages (conj pages first-resp-json)
         ]
     (->> all-pages
          (map (comp #(get % "resources")))
