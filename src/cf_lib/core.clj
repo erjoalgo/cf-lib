@@ -13,10 +13,6 @@
   (if (empty? accessors) obj
       `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))
 
-(defstruct cf-target
-  :api-endpoint :user :pass :proxy :oauth-token)
-;;TODO fill in nil atom on the struct
-
 (defn proxy-map [proxy]
   "make sure proxy is a {:host host :port port} map
 and not a string like http://my-proxy:8080"
@@ -52,16 +48,18 @@ and not a string like http://my-proxy:8080"
 
 (def cf-target-to-token
   "map cf targets to tokens accros threads"
-  (ref {}))
+  (atom {}))
 
 (defn token-for-cf-target! [cf-target & {:keys [force]}]
   "returns a token for cf-target. if no token exists or if
 :force is true obtain a new token and associate it with target"
   (let [existing (and (not force)
-                      (get cf-target-to-token cf-target))]
+                      (get @cf-target-to-token cf-target))]
     ;;TODO ensure anyone reading ref is BLOCKED until token is obtained?
-    (or existing (dosync (ref-set cf-target-to-token
-                                  (cf-token cf-target))))))
+    (or existing (get (swap! cf-target-to-token
+                        assoc
+                        cf-target
+                        (cf-token cf-target)) cf-target))))
 
 (defn cf-curl [cf-target path
                & {:keys [verb
