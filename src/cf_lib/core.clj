@@ -323,26 +323,30 @@ cf-fun-sym must be an existing function
  cf-space
  cf-service-instance)
 
-(defn cf-app-bindings-delete [cf-target app-guid]
-  "delete all bindings for an app"
-  (->>
-   (cf-app-bindings cf-target app-guid)
-   (map cf-extract-guid)
-   (map (partial cf-app-binding-delete cf-target app-guid))
-   dorun))
+(defmacro cf-define-resource-all-delete [& resource-deleter-pairs]
+  "define a function to delete all resources.
+ args is a list of (resource, deleter) pairs
+ corresponding to existing cf functions.
+resources should retrieve all resources.
+deleter deletes a single resource
+"
+  `(do ~@(->> resource-deleter-pairs
+        (map (fn [[resource deleter]]
+               (let [all-deleter-sym (format-sym "%s-delete" resource)]
+                 (printf "res del all %s %s %s\n"
+                         resource deleter all-deleter-sym)
+                 `(defn ~all-deleter-sym [cf-target# guid#]
+                    (->> (~resource cf-target# guid#)
+                         (pmap (comp (partial ~deleter cf-target#)
+                                    cf-extract-guid))
+                         dorun))
+                 )))
+        )))
 
-(defn cf-service-instance-bindings-delete [cf-target service-instance-guid]
-  "delete all bindings for a service"
-  (->> (cf-service-instance-bindings cf-target service-instance-guid)
-       (map cf-extract-guid)
-       (map #(cf-service-binding-delete cf-target %))
-       dorun))
-
-(defn cf-app-routes-delete [cf-target app-guid]
-  (->> (cf-app-routes cf-target app-guid)
-       (map cf-extract-guid)
-       (map (partial cf-route-delete cf-target))
-       dorun))
+(cf-define-resource-all-delete
+ [cf-app-bindings cf-app-binding-delete]
+ [cf-service-instance-bindings cf-service-binding-delete]
+ [cf-app-routes cf-route-delete])
 
 (defn cf-app-delete-force [cf-target app-guid]
   (do
