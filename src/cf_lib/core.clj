@@ -366,6 +366,20 @@ deleter deletes a single resource
                   "space_guid" space-guid
                   "parameters" payload}))
 
+(defn cf-service-by-label [cf-target service-label]
+  (->> (cf-services cf-target)
+      (filter (comp (partial = service-label)
+                    (partial cf-extract-entity-field "label")))
+      first))
+
+;;redefine this function: it makes no sense to search across all services
+;;for a plan by given name, ie a lot of duplicates, "Free", "Tiered", etc
+(defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
+  (->> (cf-service-plans cf-target service-guid)
+       (filter (comp (partial = service-plan-name)
+                     cf-extract-name))
+       first))
+
 (defn cf-service-instance-create-human [cf-target name
                                         service-label
                                         service-plan-name
@@ -401,19 +415,6 @@ deleter deletes a single resource
   (-> (cf-get-envs cf-target app-guid)
       (get "system_env_json")))
 
-(defn cf-service-by-label [cf-target service-label]
-  (->> (cf-services cf-target)
-      (filter (comp (partial = service-label)
-                    (partial cf-extract-entity-field "label")))
-      first))
-
-;;redefine this function: it makes no sense to search across all services
-;;for a plan by given name, ie a lot of duplicates, "Free", "Tiered", etc
-(defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
-  (->> (cf-service-plans cf-target service-guid)
-       (filter (comp (partial = service-plan-name)
-                     cf-extract-name))
-       first))
 
 (defn cf-service-instances-by-service-label [cf-target service-label]
   (let [service-guid (-> (cf-service-by-label cf-target service-label)
