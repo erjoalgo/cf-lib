@@ -68,7 +68,7 @@ and not a string like http://my-proxy:8080"
                          extra-http-client-args retry-count]
                   :or {verb :GET
                        retry-count 0}}]
-  (log/tracef "cf curl is %s %s\n" (name verb) path)
+  (log/infof "cf curl is %s %s\n" (name verb) path)
   (let [verb-fun (case verb
                    :GET client/get
                    :POST client/post
@@ -333,8 +333,6 @@ deleter deletes a single resource
   `(do ~@(->> resource-deleter-pairs
         (map (fn [[resource deleter]]
                (let [all-deleter-sym (format-sym "%s-delete" resource)]
-                 (printf "res del all %s %s %s\n"
-                         resource deleter all-deleter-sym)
                  `(defn ~all-deleter-sym [cf-target# guid#]
                     (->> (~resource cf-target# guid#)
                          (pmap (comp (partial ~deleter cf-target#)
