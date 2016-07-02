@@ -3,6 +3,7 @@
    [clj-http.client :as client]
    [clojure.data.json :as json]
    [clojure.tools.logging :as log]
+   [cf-lib.util :refer [proxy-to-map]]
    )
   (:gen-class))
 
@@ -13,23 +14,13 @@
   (if (empty? accessors) obj
       `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))
 
-(defn proxy-map [proxy]
-  "make sure proxy is a {:host host :port port} map
-and not a string like http://my-proxy:8080"
-  (when proxy
-    (condp instance? proxy
-      java.util.Map proxy
-      String (let [[_ host port] (re-matches #"^(.*):([0-9]+)$" proxy)]
-               {:host host
-                :port port}))))
-
 (defn cf-token [cf-target]
   (let [username (:user cf-target)
         password (:pass cf-target)
         login-endpoint (clojure.string/replace
                         (:api-endpoint cf-target)
                         #"api" "login")
-        proxy-map (proxy-map (:proxy cf-target))
+        proxy-map (proxy-to-map (:proxy cf-target))
         resp (client/post (str login-endpoint "/oauth/token")
                           {:basic-auth ["cf" ""]
                            :form-params {:username username
@@ -77,7 +68,7 @@ and not a string like http://my-proxy:8080"
 
         url (str (:api-endpoint cf-target) path)
 
-        proxy-map (proxy-map (:proxy cf-target))
+        proxy-map (proxy-to-map (:proxy cf-target))
         token-header {"Authorization"
                       (->> (token-for-cf-target! cf-target
                                                  :force (> retry-count 0))
