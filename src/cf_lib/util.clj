@@ -17,3 +17,6 @@ and not a string like http://my-proxy:8080"
   ;;(reduce get {1 {2 {3 {4 5}}}} [1 2 3]) => {4 5}"
   (if (empty? accessors) obj
       `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))
+
+(defn current-time-secs []
+  (-> (System/currentTimeMillis) (/ 1000) int))

@@ -3,7 +3,7 @@
    [clj-http.client :as client]
    [clojure.data.json :as json]
    [clojure.tools.logging :as log]
-   [cf-lib.util :refer [proxy-to-map]]
+   [cf-lib.util :refer [proxy-to-map current-time-secs]]
    )
   (:gen-class))
 
@@ -34,13 +34,16 @@
   "map cf targets to tokens accros threads"
   (atom {}))
 
-(defn assoc-if-too-old [min-refresh-secs map key val]
-  (let [[existing-ctime-secs existing-val] (get map key)
-        current-time-secs (current-time-secs)
-        secs-since-last #(- current-time-secs existing-ctime-secs)]
-    (if (or (not existing-ctime-secs)
-            (< (secs-since-last) min-refresh-time)) map
-        (assoc map key [current-time-secs val]))))
+(defn assoc-if [pred map key val]
+  (if (pred (get map key))
+    (assoc map key val)
+    map))
+
+(def min-token-refresh-secs 5)
+
+(defn token-too-recent? [[ctime-secs token]]
+  (let [elapsed-time (- (current-time-secs) ctime-secs)]
+    (< elapsed-time min-token-refresh-secs)))
 
 (defn token-for-cf-target! [cf-target & {:keys [force]}]
   "returns a token for cf-target. if no token exists or if
