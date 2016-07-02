@@ -10,3 +10,10 @@ and not a string like http://my-proxy:8080"
       String (let [[_ host port] (re-matches #"^(.*):([0-9]+)$" proxy)]
                {:host host
                 :port port}))))
+
+(defmacro get-chain [obj & accessors]
+  "(get-chain {1 {2 {3 {4 5}}}} 1 2 3) => {4 5}"
+  ;;the same can be accomplished without a macro:
+  ;;(reduce get {1 {2 {3 {4 5}}}} [1 2 3]) => {4 5}"
+  (if (empty? accessors) obj
+      `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))

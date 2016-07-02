@@ -7,13 +7,6 @@
    )
   (:gen-class))
 
-(defmacro get-chain [obj & accessors]
-  "(get-chain {1 {2 {3 {4 5}}}} 1 2 3) => {4 5}"
-  ;;the same can be accomplished without a macro:
-  ;;(reduce get {1 {2 {3 {4 5}}}} [1 2 3]) => {4 5}"
-  (if (empty? accessors) obj
-      `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))
-
 (defn cf-token [cf-target]
   (let [username (:user cf-target)
         password (:pass cf-target)
