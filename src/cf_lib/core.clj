@@ -266,6 +266,7 @@ call"
  [cf-service "/v2/services/%s"]
  [cf-route "/v2/routes/%s"]
  [cf-org "/v2/organizations/%s"]
+ ;[cf-domain "/v2/domain/%s"] deprecated endpoint. must use "domain_url" field
  )
 
 (defn cf-extract-name [resp]
@@ -423,3 +424,14 @@ deleter deletes a single resource
          (filter (comp (partial contains? (set service-plan-guids))
                        (partial cf-extract-entity-field
                                 "service_plan_guid"))))))
+
+(defn cf-route-url [cf-target route-id]
+  (let [route-payload (cf-route cf-target route-id)
+        host (cf-extract-entity-field "host" route-payload)
+        ;domain-guid (cf-extract-entity-field "domain_guid" route-payload)
+        domain-url (cf-extract-entity-field "domain_url" route-payload)
+        domain-payload (-> (cf-curl cf-target domain-url)
+                           :body json/read-str)
+        domain-name (cf-extract-name domain-payload)
+        ]
+    (format "%s.%s" host domain-name)))
