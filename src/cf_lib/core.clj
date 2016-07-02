@@ -47,14 +47,19 @@
 
 (defn token-for-cf-target! [cf-target & {:keys [force]}]
   "returns a token for cf-target. if no token exists or if
-:force is true obtain a new token and associate it with target"
+:force is true obtain a new token and associate it with target.
+value is cached accross threads, and a token is refreshed at most once
+within min-refresh-delay"
   (let [existing (and (not force)
                       (get @cf-target-to-token cf-target))]
-    ;;TODO ensure anyone reading ref is BLOCKED until token is obtained?
-    @(or existing (get (swap! cf-target-to-token
-                        assoc
-                        cf-target
-                        (delay (cf-token cf-target))) cf-target))))
+    (-> (or existing
+            (-> (swap! cf-target-to-token
+                       (partial assoc-if token-too-recent?)
+                       cf-target
+                       (delay (cf-token cf-target)))
+                (get cf-target)))
+        first
+        deref)))
 
 (defn cf-curl [cf-target path
                & {:keys [verb
