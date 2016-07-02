@@ -27,7 +27,7 @@
         oauth-token (-> resp :body json/read-str
                         (get "access_token"))]
     (log/infof "token obtained: %s"  oauth-token)
-    ;;(reset! (get cf-target :oauth-token) oauth-token)
+    (printf "token obtained: %s"  oauth-token)
     oauth-token))
 
 (def cf-target-to-token
