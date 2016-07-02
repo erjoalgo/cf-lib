@@ -34,6 +34,14 @@
   "map cf targets to tokens accros threads"
   (atom {}))
 
+(defn assoc-if-too-old [min-refresh-secs map key val]
+  (let [[existing-ctime-secs existing-val] (get map key)
+        current-time-secs (current-time-secs)
+        secs-since-last #(- current-time-secs existing-ctime-secs)]
+    (if (or (not existing-ctime-secs)
+            (< (secs-since-last) min-refresh-time)) map
+        (assoc map key [current-time-secs val]))))
+
 (defn token-for-cf-target! [cf-target & {:keys [force]}]
   "returns a token for cf-target. if no token exists or if
 :force is true obtain a new token and associate it with target"
