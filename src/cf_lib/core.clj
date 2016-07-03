@@ -57,15 +57,15 @@ value is cached accross threads, and a token is refreshed at most once
 within min-refresh-delay"
   (let [existing (and (not force)
                       (get @cf-target-to-token cf-target))
-        delayed-token (or existing
+        secs-token (or existing
                           (-> (swap! cf-target-to-token
                                      (partial assoc-if
                                               (comp not token-too-recent?))
                                      cf-target
-                                     (delay [(current-time-secs)
-                                             (cf-token cf-target)]))
+                                     [(current-time-secs)
+                                      (delay (cf-token cf-target))])
                               (get cf-target)))]
-    (-> (deref delayed-token) second)))
+    (-> secs-token second deref)))
 
 (defn cf-curl [cf-target path & {:keys [verb query-params body
                                         extra-http-client-args retry-count]
