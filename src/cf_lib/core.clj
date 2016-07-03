@@ -45,7 +45,7 @@ existing association value to decide whether to assoc"
 (def min-token-refresh-secs 5)
 
 (defn token-too-recent? [[ctime-secs token]]
-  "determine whether a token is too recent to refresh"
+  "returns true if a token is too recent to refresh"
   (when ctime-secs
     (let [elapsed-time (- (current-time-secs) ctime-secs)]
       (< elapsed-time min-token-refresh-secs))))
