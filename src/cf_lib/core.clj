@@ -207,9 +207,8 @@ call"
  [cf-orgs "/v2/organizations"]
  )
 
-(defn format-sym [fmt & strs-or-syms]
-  (->> strs-or-syms
-       (map name)
+(defn format-sym [fmt & args]
+  (->> args
        (apply format fmt)
        symbol))
 
