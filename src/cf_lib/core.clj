@@ -8,6 +8,7 @@
   (:gen-class))
 
 (defn cf-token [cf-target]
+  "obtain a token"
   (let [username (:user cf-target)
         password (:pass cf-target)
         login-endpoint (clojure.string/replace
@@ -35,6 +36,8 @@
   (atom {}))
 
 (defn assoc-if [pred map key val]
+  "like assoc, but uses a predicate on the (possibily nil)
+existing association value to decide whether to assoc"
   (if (pred (get map key))
     (assoc map key val)
     map))
@@ -42,6 +45,7 @@
 (def min-token-refresh-secs 5)
 
 (defn token-too-recent? [[ctime-secs token]]
+  "determine whether a token is too recent to refresh"
   (let [elapsed-time (- (current-time-secs) ctime-secs)]
     (< elapsed-time min-token-refresh-secs)))
 
@@ -61,13 +65,12 @@ within min-refresh-delay"
         first
         deref)))
 
-(defn cf-curl [cf-target path
-               & {:keys [verb
-                         query-params
-                         body
-                         extra-http-client-args retry-count]
-                  :or {verb :GET
-                       retry-count 0}}]
+(defn cf-curl [cf-target path & {:keys [verb query-params body
+                                        extra-http-client-args retry-count]
+                                 :or {verb :GET retry-count 0}}]
+  "retrying wrapper around clj-http.client requests
+refreshes token and retries request on 401 status code"
+
   (log/infof "cf curl is %s %s\n" (name verb) path)
   (let [verb-fun (case verb
                    :GET client/get
@@ -108,6 +111,8 @@ within min-refresh-delay"
                       :retry-count (inc (or retry-count 0))))))))
 
 (defn cf-depaginate-resources [cf-target resp]
+  "takes a paginated response, fetches all pages
+and accumulates their resources. awkard implementation"
   (->>
    resp
    (iterate (comp (fnil (comp
@@ -121,6 +126,8 @@ within min-refresh-delay"
    (reduce concat)))
 
 (defn cf-depaginate-resources [cf-target resp-body]
+  "takes a paginated response, fetches all pages
+and accumulates their resources"
   (loop [resp-body resp-body
          resources []
          page 0]
@@ -137,7 +144,8 @@ within min-refresh-delay"
                (inc page))))))
 
 (defn cf-pdepaginate-resources [cf-target first-resp]
-  "parallel depagination"
+  "takes a paginated response, fetches all pages
+and accumulates their resources. parallel depagination"
   (let [first-resp-json (-> first-resp :body json/read-str)
         total-pages (get first-resp-json "total_pages")
         sample-next-url (get first-resp-json "next_url")
@@ -347,17 +355,21 @@ deleter deletes a single resource
  [cf-app-routes cf-route-delete])
 
 (defn cf-app-delete-force [cf-target app-guid]
+  "delete an app by force: unbinds all service instances and
+deletes any associated routes"
   (do
     (cf-app-bindings-delete cf-target app-guid)
     (cf-app-delete cf-target app-guid)
     (cf-app-routes-delete cf-target app-guid)))
 
 (defn cf-service-instance-delete-force [cf-target service-instance-guid]
+  "delete a service instance by force: unbinds from all bound apps"
   (do (cf-service-instance-bindings-delete cf-target service-instance-guid)
       (cf-service-instance-delete cf-target service-instance-guid)))
 
 (defn cf-service-instance-create [cf-target name service-plan-guid space-guid
                                   & {:keys [payload]}]
+  "create a service instance"
   (cf-curl cf-target "/v2/service_instances" :verb :POST
            :body {"name" name
                   "service_plan_guid" service-plan-guid
@@ -365,6 +377,7 @@ deleter deletes a single resource
                   "parameters" payload}))
 
 (defn cf-service-by-label [cf-target service-label]
+  "retrieve a service by its label"
   (->> (cf-services cf-target)
       (filter (comp (partial = service-label)
                     (partial cf-extract-entity-field "label")))
@@ -373,6 +386,7 @@ deleter deletes a single resource
 ;;redefine this function: it makes no sense to search across all services
 ;;for a plan by given name, ie a lot of duplicates, "Free", "Tiered", etc
 (defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
+  "retrieve a service plan by its service guid and name"
   (->> (cf-service-plans cf-target service-guid)
        (filter (comp (partial = service-plan-name)
                      cf-extract-name))
@@ -383,6 +397,7 @@ deleter deletes a single resource
                                         service-plan-name
                                         space-name
                                         & {:keys [payload]}]
+  "human-friendly create service, similar to cf create-service"
   (let [service (cf-service-by-label cf-target service-label)
         service-guid (cf-extract-guid service)
         service-plan (cf-service-plan-by-name
@@ -396,12 +411,13 @@ deleter deletes a single resource
      name service-plan-guid space-guid :payload payload)))
 
 (defn cf-get-envs [cf-target app-guid]
+  "retrieve all envs for an app"
   (-> (cf-curl cf-target
                (format "/v2/apps/%s/env" app-guid))
       :body json/read-str))
 
 (defn cf-set-envs [cf-target app-guid envs]
-  "update existing app envs with envs"
+  "update existing app envs map with envs"
   (let [current-envs (cf-get-envs cf-target app-guid)]
     (cf-curl
      cf-target
@@ -410,11 +426,13 @@ deleter deletes a single resource
      :body {:environment_json (merge current-envs envs)})))
 
 (defn cf-app-vcap-services [cf-target app-guid]
+  "extract VCAP_SERVICES for an app"
   (-> (cf-get-envs cf-target app-guid)
       (get "system_env_json")))
 
 
 (defn cf-service-instances-by-service-label [cf-target service-label]
+  "retrieve all service instances for a service, specified by its label"
   (let [service-guid (-> (cf-service-by-label cf-target service-label)
                     cf-extract-guid)
         service-plan-guids (->> (cf-service-plans cf-target service-guid)
@@ -425,6 +443,9 @@ deleter deletes a single resource
                                 "service_plan_guid"))))))
 
 (defn cf-route-url [cf-target route-id]
+  "construct a ROUTE.DOMAIN string for a route id,
+returning a url sans protocol"
+  ;;TODO need to consider route's "path" too
   (let [route-payload (cf-route cf-target route-id)
         host (cf-extract-entity-field "host" route-payload)
         ;domain-guid (cf-extract-entity-field "domain_guid" route-payload)
