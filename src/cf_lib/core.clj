@@ -46,8 +46,9 @@ existing association value to decide whether to assoc"
 
 (defn token-too-recent? [[ctime-secs token]]
   "determine whether a token is too recent to refresh"
-  (let [elapsed-time (- (current-time-secs) ctime-secs)]
-    (< elapsed-time min-token-refresh-secs)))
+  (when ctime-secs
+    (let [elapsed-time (- (current-time-secs) ctime-secs)]
+      (< elapsed-time min-token-refresh-secs))))
 
 (defn token-for-cf-target! [cf-target & {:keys [force]}]
   "returns a token for cf-target. if no token exists or if
