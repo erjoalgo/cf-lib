@@ -180,6 +180,7 @@ call"
                           url)
                ]
            `(defn ~fun-name-sym ~arg-list
+              ~(format "retrieve all %s" fun-name-sym)
               (->> ~url-form
                    (cf-curl ~cf-target-sym)
                    (cf-pdepaginate-resources ~cf-target-sym)))
@@ -299,10 +300,12 @@ cf-fun-sym must be an existing function
                            ]
                        [
                         `(defn ~to-name-sym [cf-target# guid#]
+                           ~(format "extracts a %s's name" cf-fun-sym)
                            (-> (~cf-fun-sym cf-target# guid#)
                                (cf-extract-name)))
 
                         `(defn ~find-by-name-sym [cf-target# name#]
+                           ~(format "finds a %s's by name" cf-fun-sym)
                            (let [matches#
                                  (->> (~cf-fun-sym-plural cf-target#)
                                       (filter (comp (partial = name#)
@@ -316,6 +319,7 @@ cf-fun-sym must be an existing function
                              (first matches#)))
 
                         `(defn ~name-to-guid-sym [cf-target# name#]
+                           ~(format "map a %s's name to its guid" cf-fun-sym)
                            (-> (~find-by-name-sym cf-target# name#)
                                cf-extract-guid))
                         ]
@@ -336,9 +340,10 @@ resources should retrieve all resources.
 deleter deletes a single resource
 "
   `(do ~@(->> resource-deleter-pairs
-        (map (fn [[resource deleter]]
+        (map (fn [[resource deleter description]]
                (let [all-deleter-sym (format-sym "%s-delete" resource)]
                  `(defn ~all-deleter-sym [cf-target# guid#]
+                    ~description
                     (->> (~resource cf-target# guid#)
                          (pmap (comp (partial ~deleter cf-target#)
                                     cf-extract-guid))
@@ -347,9 +352,12 @@ deleter deletes a single resource
         )))
 
 (cf-define-resource-all-delete
- [cf-app-bindings cf-app-binding-delete]
- [cf-service-instance-bindings cf-service-binding-delete]
- [cf-app-routes cf-route-delete])
+ [cf-app-bindings cf-app-binding-delete
+  "delete all bindings for an app" ]
+ [cf-service-instance-bindings cf-service-binding-delete
+  "delete all bindings for a service instance"]
+ [cf-app-routes cf-route-delete
+  "delete all routes for an app"])
 
 (defn cf-app-delete-force [cf-target app-guid]
   "delete an app by force: unbinds all service instances and
