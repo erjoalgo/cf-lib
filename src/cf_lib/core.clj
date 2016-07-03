@@ -282,6 +282,9 @@ call"
 (defn cf-extract-guid [resp]
   (reduce get resp ["metadata" "guid"]))
 
+(defn cf-extract-url [resp]
+  (reduce get resp ["metadata" "url"]))
+
 (defn cf-extract-entity-field [field resp]
   (reduce get resp ["entity" field]))
 
