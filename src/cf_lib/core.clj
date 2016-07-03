@@ -95,9 +95,6 @@ refreshes token and retries request on 401 status code"
         complete-client-args (reduce-kv update-in extra-http-client-args
                                         update-in-args)
         ]
-    '(printf "complete client args: %s %s %s\n"
-            verb url
-            complete-client-args)
     (try (verb-fun url complete-client-args)
          (catch Exception ex
            (if-not
