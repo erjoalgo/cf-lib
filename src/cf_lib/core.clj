@@ -9,6 +9,7 @@
 
 (defn cf-token [cf-target]
   "obtain a token"
+  (log/infof "obtaining token for target: %s"  cf-target)
   (let [username (:user cf-target)
         password (:pass cf-target)
         login-endpoint (clojure.string/replace
