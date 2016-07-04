@@ -141,7 +141,6 @@ call"
  [cf-spaces "/v2/spaces"]
  [cf-space-apps "/v2/spaces/%s/apps"]
  [cf-space-service-instances "/v2/spaces/%s/service_instances"]
-
  [cf-space-services "/v2/spaces/%s/services"]
  [cf-space-service-brokers "/v2/spaces/%s/service_brokers"]
 
@@ -337,6 +336,7 @@ deletes any associated routes"
 
 ;;redefine this function: it makes no sense to search across all services
 ;;for a plan by given name, ie a lot of duplicates, "Free", "Tiered", etc
+;;this function was never actually defined
 (defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
   "retrieve a service plan by its service guid and name"
   (->> (cf-service-plans cf-target service-guid)
