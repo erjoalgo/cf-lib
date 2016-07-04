@@ -209,6 +209,7 @@ call"
 
  [cf-services "/v2/services"]
  [cf-service-plans "/v2/services/%s/service_plans"]
+ [cf-service-plan-service-instances "/v2/service_plans/%s/service_instances"]
  [cf-service-brokers "/v2/service_brokers"]
 
  [cf-users "/v2/users"]
@@ -444,13 +445,13 @@ deletes any associated routes"
 (defn cf-service-instances-by-service-label [cf-target service-label]
   "retrieve all service instances for a service, specified by its label"
   (let [service-guid (-> (cf-service-by-label cf-target service-label)
-                    cf-extract-guid)
+                         cf-extract-guid)
         service-plan-guids (->> (cf-service-plans cf-target service-guid)
-                                (map cf-extract-guid))]
-    (->> (cf-service-instances cf-target)
-         (filter (comp (partial contains? (set service-plan-guids))
-                       (partial cf-extract-entity-field
-                                "service_plan_guid"))))))
+                                (map cf-extract-guid))
+        ]
+    (->> service-plan-guids
+         (map (partial cf-service-plan-service-instances cf-target))
+         (apply concat))))
 
 (defn cf-route-url [cf-target route-id]
   "construct a ROUTE.DOMAIN string for a route id,
