@@ -395,15 +395,19 @@ deletes any associated routes"
          (apply concat))))
 
 (defn cf-route-url [cf-target route-id]
-  "construct a ROUTE.DOMAIN string for a route id,
+  "construct a ROUTE.DOMAIN[/PATH] string for a route id,
 returning a url sans protocol"
-  ;;TODO need to consider route's "path" too
   (let [route-payload (cf-route cf-target route-id)
         host (cf-extract-entity-field "host" route-payload)
-        ;domain-guid (cf-extract-entity-field "domain_guid" route-payload)
+
+        ;;on empty, will be empty str, not null
+        path (cf-extract-entity-field "path" route-payload)
+
+        ;;domain-guid (cf-extract-entity-field "domain_guid" route-payload)
+        ;;we don't know whether shared or non-shared domain, just use domain_url
         domain-url (cf-extract-entity-field "domain_url" route-payload)
         domain-payload (-> (cf-curl cf-target domain-url)
                            :body json/read-str)
         domain-name (cf-extract-name domain-payload)
         ]
-    (format "%s.%s" host domain-name)))
+    (format "%s.%s%s" host domain-name path)))
