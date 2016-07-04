@@ -8,11 +8,12 @@
    )
   (:gen-class))
 
-(defn cf-curl [cf-target path & {:keys [verb query-params body
+(defn cf-curl
+  "retrying wrapper around clj-http.client requests
+  refreshes token and retries request on 401 status code"
+  [cf-target path & {:keys [verb query-params body
                                         extra-http-client-args retry-count]
                                  :or {verb :GET retry-count 0}}]
-  "retrying wrapper around clj-http.client requests
-refreshes token and retries request on 401 status code"
 
   (log/infof "cf curl is %s %s\n" (name verb) path)
   (let [verb-fun (case verb
@@ -50,9 +51,10 @@ refreshes token and retries request on 401 status code"
                       :http-client-args extra-http-client-args
                       :retry-count (inc (or retry-count 0))))))))
 
-(defn cf-depaginate-resources [cf-target resp]
+(defn cf-depaginate-resources
   "takes a paginated response, fetches all pages
-and accumulates their resources. awkard implementation"
+  and accumulates their resources. awkard implementation"
+  [cf-target resp]
   (->>
    resp
    (iterate (comp (fnil (comp
@@ -65,9 +67,10 @@ and accumulates their resources. awkard implementation"
    (map #(get % "resources"))
    (reduce concat)))
 
-(defn cf-depaginate-resources [cf-target resp-body]
+(defn cf-depaginate-resources
   "takes a paginated response, fetches all pages
-and accumulates their resources"
+  and accumulates their resources"
+  [cf-target resp-body]
   (loop [resp-body resp-body
          resources []
          page 0]
@@ -83,9 +86,10 @@ and accumulates their resources"
                (conj resources new-resources)
                (inc page))))))
 
-(defn cf-pdepaginate-resources [cf-target first-resp]
+(defn cf-pdepaginate-resources
   "takes a paginated response, fetches all pages
-and accumulates their resources. parallel depagination"
+  and accumulates their resources. parallel depagination"
+  [cf-target first-resp]
   (let [first-resp-json (-> first-resp :body json/read-str)
         total-pages (get first-resp-json "total_pages")
         sample-next-url (get first-resp-json "next_url")
@@ -108,10 +112,10 @@ and accumulates their resources. parallel depagination"
          (map (comp #(get % "resources")))
          (apply concat))))
 
-(defmacro cf-define-depaginating-functions [& name-url-pairs]
+(defmacro cf-define-depaginating-functions
   "for each (fun-name url), define a cf function
- that takes a cf-target and optionally a guid, and make a cf-curl
-call"
+ that takes a cf-target and optionally a guid, and make a cf-curl call"
+  [& name-url-pairs]
   `(do ~@(map (fn [[fun-name-sym url]]
          (let [needs-format (.contains url "%s")
                cf-target-sym (gensym "cf-target-")
@@ -122,8 +126,9 @@ call"
                           `(format ~url ~guid-sym)
                           url)
                ]
-           `(defn ~fun-name-sym ~arg-list
+           `(defn ~fun-name-sym
               ~(format "retrieve all %s" fun-name-sym)
+              ~arg-list
               (->> ~url-form
                    (cf-curl ~cf-target-sym)
                    (cf-pdepaginate-resources ~cf-target-sym)))
@@ -156,16 +161,18 @@ call"
  [cf-orgs "/v2/organizations"]
  )
 
-(defn format-sym [fmt & args]
+(defn format-sym
+  "like format, but return a symbol instead of a string"
+  [fmt & args]
   (->> args
        (apply format fmt)
        symbol))
 
 (defmacro cf-define-get-delete-functions
-  [& name-url-pairs]
   "for each (fun-name url) pair, define
 1. a getter function that takes a cf-target and a guid,
-2. a deleter for the same resource"
+  2. a deleter for the same resource"
+  [& name-url-pairs]
   `(do
       ~@(->> (map (fn [[cf-fun url]]
                   (let [subs-count (-> (re-seq #"%s" url) count)
@@ -183,14 +190,18 @@ call"
                         ]
 
                     [
-                     `(defn ~cf-fun ~(apply vector
-                                           cf-target-get
-                                           guid-syms-get)
+                     `(defn ~cf-fun
+                        ~(format "retrieve a particular %s by guid" cf-fun)
+                        ~(apply vector
+                                cf-target-get
+                                guid-syms-get)
                         (let [url# (format ~url ~@guid-syms-get)]
                           (-> (cf-curl ~cf-target-get url#)
                               :body json/read-str)))
 
-                     `(defn ~cf-fun-delete ~(apply vector
+                     `(defn ~cf-fun-delete
+                        ~(format "delete a particular %s by guid" cf-fun)
+                        ~(apply vector
                                                   cf-target-delete
                                                   guid-syms-delete)
                         (let [url# (format ~url ~@guid-syms-delete)]
@@ -217,26 +228,34 @@ call"
  ;[cf-domain "/v2/domain/%s"] deprecated endpoint. must use "domain_url" field
  )
 
-(defn cf-extract-name [resp]
+(defn cf-extract-name
+  "extract name from a cf response json"
+  [resp]
   (reduce get resp ["entity" "name"]))
 
-(defn cf-extract-guid [resp]
+(defn cf-extract-guid
+  "extract guid from a cf response json"
+  [resp]
   (reduce get resp ["metadata" "guid"]))
 
-(defn cf-extract-url [resp]
+(defn cf-extract-url
+  "extract url from a cf response json"
+  [resp]
   (reduce get resp ["metadata" "url"]))
 
-(defn cf-extract-entity-field [field resp]
+(defn cf-extract-entity-field
+  "extract field from a cf response json's entity sub-map"
+  [field resp]
   (reduce get resp ["entity" field]))
 
-(defmacro cf-define-to-from-name-functions [& cf-fun-syms]
+(defmacro cf-define-to-from-name-functions
   "for each cf-fun, define functions,
 1. $(cf-fun)-by-name to lookup by name
 2. $(cf-fun)-name, to extract the name (returns a string)
 3. $(cf-fun)-name-to-guid, to extract the guid (returns a string)
 
-cf-fun-sym must be an existing function
-"
+cf-fun-sym must be an existing function"
+  [& cf-fun-syms]
   `(do ~@(->> (map (fn [cf-fun-sym]
                      (let [find-by-name-sym (format-sym "%s-by-name" cf-fun-sym)
                            cf-fun-sym-plural (format-sym "%ss" cf-fun-sym)
@@ -245,13 +264,15 @@ cf-fun-sym must be an existing function
                                                         cf-fun-sym)
                            ]
                        [
-                        `(defn ~to-name-sym [cf-target# guid#]
+                        `(defn ~to-name-sym
                            ~(format "extracts a %s's name" cf-fun-sym)
+                           [cf-target# guid#]
                            (-> (~cf-fun-sym cf-target# guid#)
                                (cf-extract-name)))
 
-                        `(defn ~find-by-name-sym [cf-target# name#]
-                           ~(format "finds a %s's by name" cf-fun-sym)
+                        `(defn ~find-by-name-sym
+                           ~(format "lookup a %s by name" cf-fun-sym)
+                           [cf-target# name#]
                            (let [matches#
                                  (->> (~cf-fun-sym-plural cf-target#)
                                       (filter (comp (partial = name#)
@@ -264,8 +285,9 @@ cf-fun-sym must be an existing function
                                   cf-fun-sym) name#))
                              (first matches#)))
 
-                        `(defn ~name-to-guid-sym [cf-target# name#]
+                        `(defn ~name-to-guid-sym
                            ~(format "map a %s's name to its guid" cf-fun-sym)
+                           [cf-target# name#]
                            (-> (~find-by-name-sym cf-target# name#)
                                cf-extract-guid))
                         ]
@@ -278,18 +300,20 @@ cf-fun-sym must be an existing function
  cf-space
  cf-service-instance)
 
-(defmacro cf-define-resource-all-delete [& resource-deleter-pairs]
+(defmacro cf-define-resource-all-delete
   "define a function to delete all resources.
  args is a list of (resource, deleter) pairs
  corresponding to existing cf functions.
 resources should retrieve all resources.
 deleter deletes a single resource
-"
+  "
+  [& resource-deleter-pairs]
   `(do ~@(->> resource-deleter-pairs
         (map (fn [[resource deleter description]]
                (let [all-deleter-sym (format-sym "%s-delete" resource)]
-                 `(defn ~all-deleter-sym [cf-target# guid#]
+                 `(defn ~all-deleter-sym
                     ~description
+                    [cf-target# guid#]
                     (->> (~resource cf-target# guid#)
                          (pmap (comp (partial ~deleter cf-target#)
                                     cf-extract-guid))
@@ -305,30 +329,34 @@ deleter deletes a single resource
  [cf-app-routes cf-route-delete
   "delete all routes for an app"])
 
-(defn cf-app-delete-force [cf-target app-guid]
+(defn cf-app-delete-force
   "delete an app by force: unbinds all service instances and
-deletes any associated routes"
+  deletes any associated routes"
+  [cf-target app-guid]
   (do
     (cf-app-bindings-delete cf-target app-guid)
     (cf-app-delete cf-target app-guid)
     (cf-app-routes-delete cf-target app-guid)))
 
-(defn cf-service-instance-delete-force [cf-target service-instance-guid]
+(defn cf-service-instance-delete-force
   "delete a service instance by force: unbinds from all bound apps"
+  [cf-target service-instance-guid]
   (do (cf-service-instance-bindings-delete cf-target service-instance-guid)
       (cf-service-instance-delete cf-target service-instance-guid)))
 
-(defn cf-service-instance-create [cf-target name service-plan-guid space-guid
-                                  & {:keys [payload]}]
+(defn cf-service-instance-create
   "create a service instance"
+  [cf-target name service-plan-guid space-guid
+   & {:keys [payload]}]
   (cf-curl cf-target "/v2/service_instances" :verb :POST
            :body {"name" name
                   "service_plan_guid" service-plan-guid
                   "space_guid" space-guid
                   "parameters" payload}))
 
-(defn cf-service-by-label [cf-target service-label]
+(defn cf-service-by-label
   "retrieve a service by its label"
+  [cf-target service-label]
   (->> (cf-services cf-target)
       (filter (comp (partial = service-label)
                     (partial cf-extract-entity-field "label")))
@@ -337,19 +365,21 @@ deletes any associated routes"
 ;;redefine this function: it makes no sense to search across all services
 ;;for a plan by given name, ie a lot of duplicates, "Free", "Tiered", etc
 ;;this function was never actually defined
-(defn cf-service-plan-by-name [cf-target service-guid service-plan-name]
+(defn cf-service-plan-by-name
   "retrieve a service plan by its service guid and name"
+  [cf-target service-guid service-plan-name]
   (->> (cf-service-plans cf-target service-guid)
        (filter (comp (partial = service-plan-name)
                      cf-extract-name))
        first))
 
-(defn cf-service-instance-create-human [cf-target name
+(defn cf-service-instance-create-human
+  "human-friendly create service, similar to cf create-service"
+  [cf-target name
                                         service-label
                                         service-plan-name
                                         space-name
                                         & {:keys [payload]}]
-  "human-friendly create service, similar to cf create-service"
   (let [service (cf-service-by-label cf-target service-label)
         service-guid (cf-extract-guid service)
         service-plan (cf-service-plan-by-name
@@ -362,14 +392,16 @@ deletes any associated routes"
      cf-target
      name service-plan-guid space-guid :payload payload)))
 
-(defn cf-get-envs [cf-target app-guid]
+(defn cf-get-envs
   "retrieve all envs for an app"
+  [cf-target app-guid]
   (-> (cf-curl cf-target
                (format "/v2/apps/%s/env" app-guid))
       :body json/read-str))
 
-(defn cf-set-envs [cf-target app-guid envs]
+(defn cf-set-envs
   "update existing app envs map with envs"
+  [cf-target app-guid envs]
   (let [current-envs (cf-get-envs cf-target app-guid)]
     (cf-curl
      cf-target
@@ -377,14 +409,16 @@ deletes any associated routes"
      :verb :PUT
      :body {:environment_json (merge current-envs envs)})))
 
-(defn cf-app-vcap-services [cf-target app-guid]
+(defn cf-app-vcap-services
   "extract VCAP_SERVICES for an app"
+  [cf-target app-guid]
   (-> (cf-get-envs cf-target app-guid)
       (get "system_env_json")))
 
 
-(defn cf-service-instances-by-service-label [cf-target service-label]
+(defn cf-service-instances-by-service-label
   "retrieve all service instances for a service, specified by its label"
+  [cf-target service-label]
   (let [service-guid (-> (cf-service-by-label cf-target service-label)
                          cf-extract-guid)
         service-plan-guids (->> (cf-service-plans cf-target service-guid)
@@ -394,9 +428,10 @@ deletes any associated routes"
          (map (partial cf-service-plan-service-instances cf-target))
          (apply concat))))
 
-(defn cf-route-url [cf-target route-id]
+(defn cf-route-url
   "construct a ROUTE.DOMAIN[/PATH] string for a route id,
-returning a url sans protocol"
+  returning a url sans protocol"
+  [cf-target route-id]
   (let [route-payload (cf-route cf-target route-id)
         host (cf-extract-entity-field "host" route-payload)
 
