@@ -317,7 +317,7 @@ deleter deletes a single resource
                     (->> (~resource cf-target# guid#)
                          (pmap (comp (partial ~deleter cf-target#)
                                     cf-extract-guid))
-                         dorun))
+                         doall))
                  )))
         )))
 
