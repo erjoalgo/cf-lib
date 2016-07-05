@@ -333,10 +333,17 @@ deleter deletes a single resource
   "delete an app by force: unbinds all service instances and
   deletes any associated routes"
   [cf-target app-guid]
-  (do
-    (cf-app-bindings-delete cf-target app-guid)
-    (cf-app-delete cf-target app-guid)
-    (cf-app-routes-delete cf-target app-guid)))
+  ;; need to remember app routes before deletion.
+  (let [app-route-guids (->> (cf-app-routes cf-target app-guid)
+                             (map cf-extract-guid)
+                             doall)]
+    (hash-map
+     :binding-resps (cf-app-bindings-delete cf-target app-guid)
+     :app-resp (cf-app-delete cf-target app-guid)
+     :route-resps (-> (pmap (partial cf-route-delete cf-target)
+                            app-route-guids)
+                      doall))))
+
 
 (defn cf-service-instance-delete-force
   "delete a service instance by force: unbinds from all bound apps"
