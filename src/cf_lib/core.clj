@@ -278,7 +278,7 @@ cf-fun-sym must be an existing function"
                                       (filter (comp (partial = name#)
                                                     cf-extract-name)))
                                  ]
-                             (when (rest matches#)
+                             (when (-> (rest matches#) empty?)
                                (log/warnf
                                 ~(format
                                   "multiple matches for %s with name: %%s"
