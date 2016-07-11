@@ -159,6 +159,9 @@
 
  [cf-users "/v2/users"]
  [cf-orgs "/v2/organizations"]
+
+ [cf-shared-domains "/v2/shared_domains"]
+ [cf-private-domains "/v2/private_domains"]
  )
 
 (defn format-sym
@@ -213,8 +216,6 @@
            (reduce concat)
            do)))
 
-
-
 (cf-define-get-delete-functions
  [cf-app "/v2/apps/%s"]
  [cf-space "/v2/spaces/%s"]
@@ -225,7 +226,9 @@
  [cf-service "/v2/services/%s"]
  [cf-route "/v2/routes/%s"]
  [cf-org "/v2/organizations/%s"]
- ;[cf-domain "/v2/domain/%s"] deprecated endpoint. must use "domain_url" field
+
+ [cf-shared-domain "/v2/shared_domains/%s"]
+ [cf-private-domain "/v2/private_domains/%s"]
  )
 
 (defn cf-extract-name
