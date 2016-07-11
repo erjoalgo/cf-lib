@@ -222,6 +222,7 @@
  [cf-app "/v2/apps/%s"]
  [cf-space "/v2/spaces/%s"]
  [cf-app-binding "/v2/apps/%s/service_bindings/%s"]
+ [cf-service-broker "/v2/service_brokers/%s"]
  [cf-service-binding "/v2/service_bindings/%s"]
  [cf-service-instance "/v2/service_instances/%s"]
  [cf-service-plan "/v2/service_plans/%s"]
