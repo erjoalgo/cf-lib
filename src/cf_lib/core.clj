@@ -5,6 +5,7 @@
    [clojure.tools.logging :as log]
    [cf-lib.util :refer [proxy-to-map current-time-secs]]
    [cf-lib.token :refer [token-for-cf-target!]]
+   [clojure.walk :refer [stringify-keys]]
    )
   (:gen-class))
 
@@ -145,6 +146,7 @@
 
  [cf-spaces "/v2/spaces"]
  [cf-space-apps "/v2/spaces/%s/apps"]
+ [cf-space-routes "/v2/spaces/%s/routes"]
  [cf-space-service-instances "/v2/spaces/%s/service_instances"]
  [cf-space-services "/v2/spaces/%s/services"]
  [cf-space-service-brokers "/v2/spaces/%s/service_brokers"]
@@ -456,3 +458,13 @@ deleter deletes a single resource
         domain-name (cf-extract-name domain-payload)
         ]
     (format "%s.%s%s" host domain-name path)))
+
+(defn cf-route-create
+  "create a new route"
+  [cf-target domain-guid space-guid {:keys [host port path] :as extra}]
+  (cf-curl cf-target "/v2/routes" :verb :POST
+           :body (-> {"domain_guid" domain-guid
+                      "space_guid" space-guid}
+                     (merge (->> (filter second extra)
+                                 flatten (apply hash-map)
+                                 )))))
