@@ -26,11 +26,10 @@
         url (str (:api-endpoint cf-target) path)
 
         proxy-map (proxy-to-map (:proxy cf-target))
-        token-header {"Authorization"
-                      (->> (token-for-cf-target! cf-target
-                                                 :force (> retry-count 0))
-                           (str "bearer "))}
-
+        token (or (-> :token cf-target)
+                  (token-for-cf-target! cf-target
+                                        :force (> retry-count 0)))
+        token-header {"Authorization" (str "bearer " token)}
         update-in-args {[:headers] (partial merge token-header)
                         [:body] (fnil identity (json/write-str body))
                         [:query-params] (partial merge query-params)
