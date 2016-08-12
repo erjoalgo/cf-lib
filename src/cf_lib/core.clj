@@ -471,3 +471,9 @@ deleter deletes a single resource
                      (merge (->> (filter second extra)
                                  flatten (apply hash-map)
                                  )))))
+
+(defn cf-app-restage "restage an app"
+  [cf-target app-guid]
+  ;;POST /v2/apps/63e33a8c-7bc0-498e-b132-ca9dba4dbdab/restage
+  (cf-curl cf-target (format "/v2/apps/%s/restage" app-guid)
+           :verb :POST))
