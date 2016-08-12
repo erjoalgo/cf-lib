@@ -13,9 +13,10 @@
   (log/infof "obtaining token for target: %s"  cf-target)
   (let [username (:user cf-target)
         password (:pass cf-target)
-        login-endpoint (clojure.string/replace
-                        (:api-endpoint cf-target)
-                        #"api" "login")
+        login-endpoint (or (:uaa-endpoint cf-target)
+                           (clojure.string/replace
+                            (:api-endpoint cf-target)
+                            #"api" "login"))
         proxy-map (proxy-to-map (:proxy cf-target))
         resp (client/post (str login-endpoint "/oauth/token")
                           {:basic-auth ["cf" ""]
