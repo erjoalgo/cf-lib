@@ -304,7 +304,9 @@ cf-fun-sym must be an existing function"
 (cf-define-to-from-name-functions
  cf-app
  cf-space
- cf-service-instance)
+ cf-service-instance
+ cf-org
+ cf-shared-domain)
 
 (defmacro cf-define-resource-all-delete
   "define a function to delete all resources.
