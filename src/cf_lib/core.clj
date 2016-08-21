@@ -464,12 +464,12 @@ deleter deletes a single resource
 (defn cf-route-create
   "create a new route"
   [cf-target domain-guid space-guid {:keys [host port path] :as extra}]
-  (cf-curl cf-target "/v2/routes" :verb :POST
+  (-> (cf-curl cf-target "/v2/routes" :verb :POST
            :body (-> {"domain_guid" domain-guid
                       "space_guid" space-guid}
                      (merge (->> (filter second extra)
-                                 flatten (apply hash-map)
-                                 )))))
+                                 flatten (apply hash-map)))))
+      :body json/read-str))
 
 (defn cf-map-route
   "map a route to an app"
