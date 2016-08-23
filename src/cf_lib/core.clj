@@ -119,9 +119,11 @@
   `(do ~@(map (fn [[fun-name-sym url]]
          (let [needs-format (.contains url "%s")
                cf-target-sym (gensym "cf-target-")
+               q-params-sym (gensym "q-params")
                guid-sym (gensym "guid-")
-               arg-list (apply vector cf-target-sym
-                               (when needs-format [guid-sym]))
+               arg-list `[~cf-target-sym
+                          ~@(when needs-format [guid-sym])
+                          & {~q-params-sym :q}]
                url-form (if needs-format
                           `(format ~url ~guid-sym)
                           url)
@@ -129,8 +131,10 @@
            `(defn ~fun-name-sym
               ~(format "retrieve all %s" fun-name-sym)
               ~arg-list
-              (->> ~url-form
-                   (cf-curl ~cf-target-sym)
+              (->> (cf-curl ~cf-target-sym ~url-form
+                            :query-params
+                            {:q (map (partial clojure.string/join ":")
+                                     ~q-params-sym)})
                    (cf-pdepaginate-resources ~cf-target-sym)))
            ))
        name-url-pairs)))
