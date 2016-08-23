@@ -475,12 +475,21 @@ deleter deletes a single resource
                                  flatten (apply hash-map)))))
       :body json/read-str))
 
-(defn cf-map-route
-  "map a route to an app"
+(defn cf-route-mapping-create
+  "create a route mapping"
   [cf-target route-guid app-guid]
   (cf-curl cf-target "/v2/route_mappings" :verb :POST
            :body (-> {"app_guid" app-guid
                       "route_guid" route-guid})))
+
+(defn cf-map-route [cf-target & {:keys [host port path app-guid]}]
+  "create a new route and map it to an app"
+  (let [route (cf-route-create
+               cf-target
+               :host host :port port :path path)
+        route-guid (cf-extract-guid route)]
+    (cf-route-mapping-create route-guid app-guid)))
+
 
 (defn cf-app-restage "restage an app"
   [cf-target app-guid]
