@@ -9,28 +9,45 @@
 (def min-token-refresh-secs 5)
 
 (defn cf-token [cf-target]
-  "obtain a token"
+  "obtain a token given either (username password) or authorization-code"
   (log/infof "obtaining token for target: %s"  cf-target)
   (let [username (:user cf-target)
         password (:pass cf-target)
+        code (:code cf-target)
         login-endpoint (or (:uaa-endpoint cf-target)
                            (clojure.string/replace
                             (:api-endpoint cf-target)
                             #"api" "login"))
+        token-url (str login-endpoint "/oauth/token")
         proxy-map (proxy-to-map (:proxy cf-target))
-        resp (client/post (str login-endpoint "/oauth/token")
-                          {:basic-auth ["cf" ""]
-                           :form-params {:username username
-                                         :password password
-                                         :grant_type "password"}
-                           :accept :json
+        req-params-common {:accept :json
                            :proxy-host (:host proxy-map)
                            :proxy-port (:port proxy-map)
-                           :insecure? (:insecure? cf-target)})
+                           :insecure? (:insecure? cf-target)}
+        req-params-extra (cond (and username password)
+                               {:basic-auth ["cf" ""]
+                                :form-params {:username username
+                                              :password password
+                                              :grant_type "password"}}
+                               code {:query-params
+                                     {"grant_type" "authorization_code"
+                                      "client_id" "login"
+                                      "client_secret" "loginsecret"
+                                      "response_type" "token"
+                                      "token_format" "opaque"
+                                      "code" code
+                                      "redirect_uri"
+                                      "http://localhost:1223/oauth/code-grant"}
+                                     :content-type
+                                     "application/x-www-form-urlencoded"
+                                     }
+                               true (throw (Exception.
+                                            "must provide user/pass or code")))
+        resp (client/post token-url (merge req-params-common req-params-extra))
         oauth-token (-> resp :body json/read-str
                         (get "access_token"))]
     (log/infof "token obtained: %s"  oauth-token)
-    (printf "token obtained: %s"  oauth-token)
+    (printf "token obtained: %s\n"  oauth-token)
     oauth-token))
 
 (def cf-target-to-token

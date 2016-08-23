@@ -433,7 +433,6 @@ deleter deletes a single resource
   (-> (cf-get-envs cf-target app-guid)
       (get "system_env_json")))
 
-
 (defn cf-service-instances-by-service-label
   "retrieve all service instances for a service, specified by its label"
   [cf-target service-label]
