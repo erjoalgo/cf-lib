@@ -1,6 +1,6 @@
 (in-ns 'cf-lib.core)
 
-(defn format-sym
+(defn- format-sym
   "like format, but return a symbol instead of a string"
   [fmt & args]
   (->> args

@@ -8,7 +8,7 @@
 
 (def min-token-refresh-secs 5)
 
-(defn current-time-secs []
+(defn- current-time-secs []
   "return the current time in seconds"
   (-> (System/currentTimeMillis) (/ 1000) int))
 
@@ -58,14 +58,14 @@
   "map cf targets to tokens accros threads"
   (atom {}))
 
-(defn assoc-if [pred map key val]
+(defn- assoc-if [pred map key val]
   "like assoc, but uses a predicate on the (possibily nil)
 existing association value to decide whether to assoc"
   (if (pred (get map key))
     (assoc map key val)
     map))
 
-(defn token-too-recent? [[ctime-secs token]]
+(defn- token-too-recent? [[ctime-secs token]]
   "returns true if a token is too recent to refresh"
   (when ctime-secs
     (let [elapsed-time (- (current-time-secs) ctime-secs)]

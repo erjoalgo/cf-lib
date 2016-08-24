@@ -62,7 +62,7 @@
   [field resp]
   (reduce get resp ["entity" field]))
 
-(defn cf-depaginate-resources
+(defn- cf-depaginate-resources
   "takes a paginated response, fetches all pages
   and accumulates their resources. awkard implementation"
   [cf-target resp]
