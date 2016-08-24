@@ -30,14 +30,14 @@
                   (token-for-cf-target! cf-target
                                         :force (> retry-count 0)))
         token-header {"Authorization" (str "bearer " token)}
-        update-in-args {[:headers] (partial merge token-header)
-                        [:body] (fnil identity (json/write-str body))
-                        [:query-params] (partial merge query-params)
-                        [:proxy-host] (fnil identity (:host proxy-map))
-                        [:proxy-port] (fnil identity (:port proxy-map))
-                        [:insecure?] (fnil identity (:insecure? cf-target))}
-        complete-client-args (reduce-kv update-in extra-http-client-args
-                                        update-in-args)
+        update-args {:headers (partial merge token-header)
+                     :body (fnil identity (json/write-str body))
+                     :query-params (partial merge query-params)
+                     :proxy-host (fnil identity (:host proxy-map))
+                     :proxy-port (fnil identity (:port proxy-map))
+                     :insecure? (fnil identity (:insecure? cf-target))}
+        complete-client-args (reduce-kv update extra-http-client-args
+                                        update-args)
         ]
     (try (verb-fun url complete-client-args)
          (catch Exception ex
