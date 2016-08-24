@@ -64,8 +64,7 @@
                   (get resp "next_url"))
             (-> resp json/read-str :body))
    (take-while (comp not nil?))
-   (map #(get % "resources"))
-   (reduce concat)))
+   (mapcat #(get % "resources"))))
 
 (defn cf-depaginate-resources
   "takes a paginated response, fetches all pages
@@ -182,7 +181,7 @@
   2. a deleter for the same resource"
   [& name-url-pairs]
   `(do
-      ~@(->> (map (fn [[cf-fun url]]
+      ~@(->> (mapcat (fn [[cf-fun url]]
                   (let [subs-count (-> (re-seq #"%s" url) count)
                         gen-guid-syms (fn []
                                         (repeatedly subs-count
@@ -218,7 +217,6 @@
                      ]
                     ))
                 name-url-pairs)
-           (reduce concat)
            do)))
 
 (cf-define-get-delete-functions
@@ -265,7 +263,7 @@
 
 cf-fun-sym must be an existing function"
   [& cf-fun-syms]
-  `(do ~@(->> (map (fn [cf-fun-sym]
+  `(do ~@(->> (mapcat (fn [cf-fun-sym]
                      (let [find-by-name-sym (format-sym "%s-by-name" cf-fun-sym)
                            cf-fun-sym-plural (format-sym "%ss" cf-fun-sym)
                            to-name-sym (format-sym "%s-name" cf-fun-sym)
@@ -301,8 +299,7 @@ cf-fun-sym must be an existing function"
                                cf-extract-guid))
                         ]
                        ))
-                   cf-fun-syms)
-              (reduce concat))))
+                   cf-fun-syms))))
 
 (cf-define-to-from-name-functions
  cf-app
