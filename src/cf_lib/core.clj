@@ -280,11 +280,8 @@ cf-fun-sym must be an existing function"
                         `(defn ~find-by-name-sym
                            ~(format "lookup a %s by name" cf-fun-sym)
                            [cf-target# name#]
-                           (let [matches#
-                                 (->> (~cf-fun-sym-plural cf-target#)
-                                      (filter (comp (partial = name#)
-                                                    cf-extract-name)))
-                                 ]
+                           (let [matches# (~cf-fun-sym-plural cf-target#
+                                           :q {"name" name#})]
                              (when-not (-> (rest matches#) empty?)
                                (log/warnf
                                 ~(format
