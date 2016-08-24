@@ -142,14 +142,14 @@
      cf-target
      name service-plan-guid space-guid :payload payload)))
 
-(defn cf-get-envs
+(defn cf-app-envs
   "retrieve all envs for an app"
   [cf-target app-guid]
   (-> (cf-curl cf-target
                (format "/v2/apps/%s/env" app-guid))
       :body json/read-str))
 
-(defn cf-set-envs
+(defn cf-app-envs-set
   "update existing app envs map with envs"
   [cf-target app-guid envs]
   (let [current-envs (cf-get-envs cf-target app-guid)]
