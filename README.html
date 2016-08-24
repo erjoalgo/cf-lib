@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>cf-lib</title>
+<!-- 2016-08-23 Tue 23:12 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Ernesto Alfonso" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">cf-lib</h1>
+<p>
+Clojure bindings for the cloudfoundry api.
+</p>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Leiningen dependency</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+
+<pre class="src src-clojure">[cf-lib <span style="color: #8b2252;">"0.1.0-SNAPSHOT"</span>]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Sample usage</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li>Define a cf login.
+</li>
+<li><code>(use 'cf-lib.core)</code>
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #b22222;">;; </span><span style="color: #b22222;">Connected to nREPL server - nrepl://localhost:51182</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">CIDER 0.13.0snapshot (package: 20160706.218), nREPL 0.2.12</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Clojure 1.8.0, Java 1.8.0_91</span>
+<span style="color: #b22222;">;;     </span><span style="color: #b22222;">Docs: (doc function-name)</span>
+<span style="color: #b22222;">;;           </span><span style="color: #b22222;">(find-doc part-of-name)</span>
+<span style="color: #b22222;">;;   </span><span style="color: #b22222;">Source: (source function-name)</span>
+<span style="color: #b22222;">;;  </span><span style="color: #b22222;">Javadoc: (javadoc java-object-or-class)</span>
+<span style="color: #b22222;">;;     </span><span style="color: #b22222;">Exit: &lt;C-c C-q&gt;</span>
+<span style="color: #b22222;">;;  </span><span style="color: #b22222;">Results: Stored in vars *1, *2, *3, an exception in *e;</span>
+
+user&gt; (<span style="color: #a020f0;">def</span> <span style="color: #a0522d;">cf-login</span> {
+                  <span style="color: #008b8b;">:user</span> <span style="color: #8b2252;">"me@example.com"</span>
+                  <span style="color: #008b8b;">:pass</span> <span style="color: #8b2252;">"my-pass"</span>
+                  <span style="color: #008b8b;">:proxy</span> {<span style="color: #008b8b;">:host</span> <span style="color: #8b2252;">"my-proxy.ge.com"</span>
+                          <span style="color: #008b8b;">:port</span> 8080}
+                  <span style="color: #008b8b;">:api-endpoint</span> <span style="color: #8b2252;">"https://api.system.asv-pr.ice.predix.io"</span>
+                  })
+#'<span style="color: #228b22;">user</span><span style="color: #000000; background-color: #ffffff;">/</span>cf-login
+user&gt; (use '<span style="color: #228b22;">cf-lib.core</span>)
+<span style="color: #008b8b;">nil</span>
+</pre>
+</div>
+
+
+<ul class="org-ul">
+<li>Get all apps
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (<span style="color: #a020f0;">def</span> <span style="color: #a0522d;">all-apps</span> (cf-apps cf-login))
+token obtained: eyJhb...some-token
+#'<span style="color: #228b22;">user</span><span style="color: #000000; background-color: #ffffff;">/</span>all-apps
+user&gt; (count all-apps)
+299
+user&gt; (<span style="color: #a020f0;">-&gt;</span> all-apps first keys)
+(<span style="color: #8b2252;">"metadata"</span> <span style="color: #8b2252;">"entity"</span>)
+user&gt; (<span style="color: #a020f0;">-&gt;</span> all-apps first)
+{<span style="color: #8b2252;">"metadata"</span> {<span style="color: #8b2252;">"guid"</span> <span style="color: #8b2252;">"bdb9f729-fa47-4b09-ac09-fd28ca64da91"</span>, <span style="color: #8b2252;">"url"</span> <span style="color: #8b2252;">"/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91"</span>, <span style="color: #8b2252;">"created_at"</span> <span style="color: #8b2252;">"2016-02-17T19:01:23Z"</span>, <span style="color: #8b2252;">"updated_at"</span> <span style="color: #8b2252;">"2016-03-10T00:33:25Z"</span>}, <span style="color: #8b2252;">"entity"</span> {<span style="color: #8b2252;">"detected_buildpack"</span> <span style="color: #8b2252;">"java-buildpack=v3.0-https://github.com/cloudfoundry/java-buildpack.git#3bd15e1 java-main open-jdk-jre=1.8.0_73 spring-auto-reconfiguration=1.10.0_RELEASE"</span>, <span style="color: #8b2252;">"package_updated_at"</span> <span style="color: #8b2252;">"2016-03-03T22:20:36Z"</span>, <span style="color: #8b2252;">"production"</span> <span style="color: #008b8b;">false</span>, <span style="color: #8b2252;">"command"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"package_state"</span> <span style="color: #8b2252;">"STAGED"</span>, <span style="color: #8b2252;">"service_bindings_url"</span> <span style="color: #8b2252;">"/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/service_bindings"</span>, <span style="color: #8b2252;">"health_check_timeout"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"diego"</span> <span style="color: #008b8b;">false</span>, <span style="color: #8b2252;">"space_url"</span> <span style="color: #8b2252;">"/v2/spaces/390807ae-647d-4b7a-96a9-05599abc186e"</span>, <span style="color: #8b2252;">"disk_quota"</span> 1024, <span style="color: #8b2252;">"docker_credentials_json"</span> {<span style="color: #8b2252;">"redacted_message"</span> <span style="color: #8b2252;">"[PRIVATE DATA HIDDEN]"</span>}, <span style="color: #8b2252;">"buildpack"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"console"</span> <span style="color: #008b8b;">false</span>, <span style="color: #8b2252;">"name"</span> <span style="color: #8b2252;">"hubs-single-service-broker"</span>, <span style="color: #8b2252;">"routes_url"</span> <span style="color: #8b2252;">"/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/routes"</span>, <span style="color: #8b2252;">"health_check_type"</span> <span style="color: #8b2252;">"port"</span>, <span style="color: #8b2252;">"debug"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"route_mappings_url"</span> <span style="color: #8b2252;">"/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/route_mappings"</span>, <span style="color: #8b2252;">"space_guid"</span> <span style="color: #8b2252;">"390807ae-647d-4b7a-96a9-05599abc186e"</span>, <span style="color: #8b2252;">"memory"</span> 1024, <span style="color: #8b2252;">"docker_image"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"detected_start_command"</span> <span style="color: #8b2252;">"SERVER_PORT=$PORT $PWD/.java-buildpack/open_jdk_jre/bin/java -cp $PWD/.:$PWD/.java-buildpack/spring_auto_reconfiguration/spring_auto_reconfiguration-1.10.0_RELEASE.jar -Djava.io.tmpdir=$TMPDIR -XX:OnOutOfMemoryError=$PWD/.java-buildpack/open_jdk_jre/bin/killjava.sh -Xmx768M -Xms768M -XX:MaxMetaspaceSize=104857K -XX:MetaspaceSize=104857K -Xss1M org.springframework.boot.loader.JarLauncher"</span>, <span style="color: #8b2252;">"staging_failed_description"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"events_url"</span> <span style="color: #8b2252;">"/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/events"</span>, <span style="color: #8b2252;">"state"</span> <span style="color: #8b2252;">"STARTED"</span>, <span style="color: #8b2252;">"version"</span> <span style="color: #8b2252;">"ac039a0c-010f-43e1-b5be-84872e38341d"</span>, <span style="color: #8b2252;">"enable_ssh"</span> <span style="color: #008b8b;">true</span>, <span style="color: #8b2252;">"staging_failed_reason"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"instances"</span> 1, <span style="color: #8b2252;">"stack_url"</span> <span style="color: #8b2252;">"/v2/stacks/cc01650c-bfcd-4d62-aae2-627e0859ae41"</span>, <span style="color: #8b2252;">"staging_task_id"</span> <span style="color: #8b2252;">"2b6711f9354b4cdfbeca0f0a5c21ae83"</span>, <span style="color: #8b2252;">"environment_json"</span> {}, <span style="color: #8b2252;">"stack_guid"</span> <span style="color: #8b2252;">"cc01650c-bfcd-4d62-aae2-627e0859ae41"</span>, <span style="color: #8b2252;">"ports"</span> <span style="color: #008b8b;">nil</span>}}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Use cf api filter queries to filter by name
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (<span style="color: #a020f0;">def</span> <span style="color: #a0522d;">cf-browser-apps</span> (cf-apps cf-login <span style="color: #008b8b;">:q</span> {<span style="color: #8b2252;">"name"</span> <span style="color: #8b2252;">"cf-browser"</span>}))
+#'<span style="color: #228b22;">user</span><span style="color: #000000; background-color: #ffffff;">/</span>cf-browser-apps
+user&gt; (count cf-browser-apps)
+3
+user&gt; (cf-extract-guid (first cf-browser-apps))
+<span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Show app envs
+</li>
+<li>Set app envs
+</li>
+<li>Verify new value
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (cf-app-envs cf-login <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>)
+{<span style="color: #8b2252;">"staging_env_json"</span> {}, <span style="color: #8b2252;">"running_env_json"</span> {}, <span style="color: #8b2252;">"environment_json"</span> {}, <span style="color: #8b2252;">"system_env_json"</span> {<span style="color: #8b2252;">"VCAP_SERVICES"</span> {}}, <span style="color: #8b2252;">"application_env_json"</span> {<span style="color: #8b2252;">"VCAP_APPLICATION"</span> {<span style="color: #8b2252;">"application_id"</span> <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>, <span style="color: #8b2252;">"space_name"</span> <span style="color: #8b2252;">"dev"</span>, <span style="color: #8b2252;">"space_id"</span> <span style="color: #8b2252;">"0942b30f-44fa-489f-a8f5-2a9ba785b4df"</span>, <span style="color: #8b2252;">"name"</span> <span style="color: #8b2252;">"cf-browser"</span>, <span style="color: #8b2252;">"application_version"</span> <span style="color: #8b2252;">"2c73b201-9be0-463b-ae07-2d997abc109b"</span>, <span style="color: #8b2252;">"application_uris"</span> [], <span style="color: #8b2252;">"users"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"application_name"</span> <span style="color: #8b2252;">"cf-browser"</span>, <span style="color: #8b2252;">"version"</span> <span style="color: #8b2252;">"2c73b201-9be0-463b-ae07-2d997abc109b"</span>, <span style="color: #8b2252;">"uris"</span> [], <span style="color: #8b2252;">"limits"</span> {<span style="color: #8b2252;">"fds"</span> 16384, <span style="color: #8b2252;">"mem"</span> 500, <span style="color: #8b2252;">"disk"</span> 1024}}}}
+user&gt; (cf-app-envs-set cf-login <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>
+                       {<span style="color: #8b2252;">"sample-key-1"</span> <span style="color: #8b2252;">"val-1"</span>
+                        <span style="color: #8b2252;">"sample-key-2"</span> <span style="color: #8b2252;">"val-2"</span>})
+{<span style="color: #008b8b;">:request-time</span> 1067, <span style="color: #008b8b;">:repeatable?</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:streaming?</span> <span style="color: #008b8b;">true</span>, <span style="color: #008b8b;">:chunked?</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:cookies</span> {<span style="color: #8b2252;">"TS0164a009"</span> {<span style="color: #008b8b;">:discard</span> <span style="color: #008b8b;">true</span>, <span style="color: #008b8b;">:domain</span> <span style="color: #8b2252;">"predix.io"</span>, <span style="color: #008b8b;">:path</span> <span style="color: #8b2252;">"/"</span>, <span style="color: #008b8b;">:secure</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:value</span> <span style="color: #8b2252;">"0118c62c55c47af89214fb806e2e2cdce257f25e628adbd00f2985bc6d481386d6a825b250"</span>, <span style="color: #008b8b;">:version</span> 0}}, <span style="color: #008b8b;">:headers</span> {<span style="color: #8b2252;">"Content-Length"</span> <span style="color: #8b2252;">"2758"</span>, <span style="color: #8b2252;">"Content-Type"</span> <span style="color: #8b2252;">"application/json;charset=utf-8"</span>, <span style="color: #8b2252;">"Date"</span> <span style="color: #8b2252;">"Wed, 24 Aug 2016 04:51:28 GMT"</span>, <span style="color: #8b2252;">"X-Content-Type-Options"</span> <span style="color: #8b2252;">"nosniff"</span>, <span style="color: #8b2252;">"X-Vcap-Request-Id"</span> [<span style="color: #8b2252;">"c23f7b6f-eeec-44cb-51e7-899328d61a7d"</span> <span style="color: #8b2252;">"c23f7b6f-eeec-44cb-51e7-899328d61a7d::e54acb34-e527-4003-95d1-eeebfcae3269"</span>], <span style="color: #8b2252;">"Connection"</span> <span style="color: #8b2252;">"close"</span>}, <span style="color: #008b8b;">:orig-content-encoding</span> <span style="color: #008b8b;">nil</span>, <span style="color: #008b8b;">:status</span> 201, <span style="color: #008b8b;">:length</span> 2758, <span style="color: #008b8b;">:body</span> <span style="color: #8b2252;">"{</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">  </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">metadata</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">guid</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">52267073-53ac-4e6f-b61a-bbcfbea765ff</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">created_at</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">2016-07-20T18:00:42Z</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">updated_at</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">2016-08-24T04:51:28Z</span><span style="color: #8b2252; font-weight: bold;">\"\n</span><span style="color: #8b2252;">  },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">  </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">entity</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">cf-browser</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">production</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: false,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">space_guid</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">0942b30f-44fa-489f-a8f5-2a9ba785b4df</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">stack_guid</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">cc01650c-bfcd-4d62-aae2-627e0859ae41</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">buildpack</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">git://github.com/heroku/heroku-buildpack-clojure.git</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">detected_buildpack</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">environment_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">staging_env_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n\n</span><span style="color: #8b2252;">      },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">running_env_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n\n</span><span style="color: #8b2252;">      },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">environment_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {      },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">system_env_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">        </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">VCAP_SERVICES</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n\n</span><span style="color: #8b2252;">        }</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">application_env_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">        </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">VCAP_APPLICATION</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">application_id</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">52267073-53ac-4e6f-b61a-bbcfbea765ff</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">space_name</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">dev</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">space_id</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">0942b30f-44fa-489f-a8f5-2a9ba785b4df</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">cf-browser</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">application_version</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">2c73b201-9be0-463b-ae07-2d997abc109b</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">application_uris</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: [</span><span style="color: #8b2252; font-weight: bold;">\n\n</span><span style="color: #8b2252;">          ],</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">users</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">application_name</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">cf-browser</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">version</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">2c73b201-9be0-463b-ae07-2d997abc109b</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">uris</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: [</span><span style="color: #8b2252; font-weight: bold;">\n\n</span><span style="color: #8b2252;">          ],</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">limits</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">            </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">fds</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: 16384,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">            </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">mem</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: 500,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">            </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">disk</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: 1024</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">          }</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">        }</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">sample-key-1</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">val-1</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">sample-key-2</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">val-2</span><span style="color: #8b2252; font-weight: bold;">\"\n</span><span style="color: #8b2252;">    },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">memory</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: 500,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">instances</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: 1,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">disk_quota</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: 1024,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">state</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">STOPPED</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">version</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">2c73b201-9be0-463b-ae07-2d997abc109b</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">command</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">console</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: false,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">debug</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">staging_task_id</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">package_state</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">FAILED</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">health_check_type</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">port</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">health_check_timeout</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">staging_failed_reason</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">StagingTimeExpired</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">staging_failed_description</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">diego</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: false,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">docker_image</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">package_updated_at</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">detected_start_command</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">enable_ssh</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: false,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">docker_credentials_json</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: {</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">      </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">redacted_message</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">[PRIVATE DATA HIDDEN]</span><span style="color: #8b2252; font-weight: bold;">\"\n</span><span style="color: #8b2252;">    },</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">ports</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: null,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">space_url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/spaces/0942b30f-44fa-489f-a8f5-2a9ba785b4df</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">stack_url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/stacks/cc01650c-bfcd-4d62-aae2-627e0859ae41</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">routes_url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/routes</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">events_url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/events</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">service_bindings_url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/service_bindings</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">,</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">    </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">route_mappings_url</span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">: </span><span style="color: #8b2252; font-weight: bold;">\"</span><span style="color: #8b2252;">/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/route_mappings</span><span style="color: #8b2252; font-weight: bold;">\"\n</span><span style="color: #8b2252;">  }</span><span style="color: #8b2252; font-weight: bold;">\n</span><span style="color: #8b2252;">}"</span>, <span style="color: #008b8b;">:trace-redirects</span> [<span style="color: #8b2252;">"https://api.system.asv-pr.ice.predix.io/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>]}
+user&gt; (cf-app-envs cf-login <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>)
+{<span style="color: #8b2252;">"staging_env_json"</span> {}, <span style="color: #8b2252;">"running_env_json"</span> {}, <span style="color: #8b2252;">"environment_json"</span> {<span style="color: #8b2252;">"staging_env_json"</span> {}, <span style="color: #8b2252;">"running_env_json"</span> {}, <span style="color: #8b2252;">"environment_json"</span> {}, <span style="color: #8b2252;">"system_env_json"</span> {<span style="color: #8b2252;">"VCAP_SERVICES"</span> {}}, <span style="color: #8b2252;">"application_env_json"</span> {<span style="color: #8b2252;">"VCAP_APPLICATION"</span> {<span style="color: #8b2252;">"application_id"</span> <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>, <span style="color: #8b2252;">"space_name"</span> <span style="color: #8b2252;">"dev"</span>, <span style="color: #8b2252;">"space_id"</span> <span style="color: #8b2252;">"0942b30f-44fa-489f-a8f5-2a9ba785b4df"</span>, <span style="color: #8b2252;">"name"</span> <span style="color: #8b2252;">"cf-browser"</span>, <span style="color: #8b2252;">"application_version"</span> <span style="color: #8b2252;">"2c73b201-9be0-463b-ae07-2d997abc109b"</span>, <span style="color: #8b2252;">"application_uris"</span> [], <span style="color: #8b2252;">"users"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"application_name"</span> <span style="color: #8b2252;">"cf-browser"</span>, <span style="color: #8b2252;">"version"</span> <span style="color: #8b2252;">"2c73b201-9be0-463b-ae07-2d997abc109b"</span>, <span style="color: #8b2252;">"uris"</span> [], <span style="color: #8b2252;">"limits"</span> {<span style="color: #8b2252;">"fds"</span> 16384, <span style="color: #8b2252;">"mem"</span> 500, <span style="color: #8b2252;">"disk"</span> 1024}}}, <span style="color: #8b2252;">"sample-key-1"</span> <span style="color: #8b2252;">"val-1"</span>, <span style="color: #8b2252;">"sample-key-2"</span> <span style="color: #8b2252;">"val-2"</span>}, <span style="color: #8b2252;">"system_env_json"</span> {<span style="color: #8b2252;">"VCAP_SERVICES"</span> {}}, <span style="color: #8b2252;">"application_env_json"</span> {<span style="color: #8b2252;">"VCAP_APPLICATION"</span> {<span style="color: #8b2252;">"application_id"</span> <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>, <span style="color: #8b2252;">"space_name"</span> <span style="color: #8b2252;">"dev"</span>, <span style="color: #8b2252;">"space_id"</span> <span style="color: #8b2252;">"0942b30f-44fa-489f-a8f5-2a9ba785b4df"</span>, <span style="color: #8b2252;">"name"</span> <span style="color: #8b2252;">"cf-browser"</span>, <span style="color: #8b2252;">"application_version"</span> <span style="color: #8b2252;">"2c73b201-9be0-463b-ae07-2d997abc109b"</span>, <span style="color: #8b2252;">"application_uris"</span> [], <span style="color: #8b2252;">"users"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"application_name"</span> <span style="color: #8b2252;">"cf-browser"</span>, <span style="color: #8b2252;">"version"</span> <span style="color: #8b2252;">"2c73b201-9be0-463b-ae07-2d997abc109b"</span>, <span style="color: #8b2252;">"uris"</span> [], <span style="color: #8b2252;">"limits"</span> {<span style="color: #8b2252;">"fds"</span> 16384, <span style="color: #8b2252;">"mem"</span> 500, <span style="color: #8b2252;">"disk"</span> 1024}}}}
+user&gt; (<span style="color: #a020f0;">-&gt;</span> cf-login
+          (cf-app-envs <span style="color: #8b2252;">"52267073-53ac-4e6f-b61a-bbcfbea765ff"</span>)
+          (get <span style="color: #8b2252;">"environment_json"</span>)
+          (get <span style="color: #8b2252;">"sample-key-1"</span>))
+<span style="color: #8b2252;">"val-1"</span>
+</pre>
+</div>
+<ul class="org-ul">
+<li>Show names of all spaces 
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (<span style="color: #a020f0;">-&gt;&gt;</span> (cf-spaces cf-login)
+           (map cf-extract-name))
+(<span style="color: #8b2252;">"dev"</span> <span style="color: #8b2252;">"poc"</span> <span style="color: #8b2252;">"qa"</span> <span style="color: #8b2252;">"perf"</span> <span style="color: #8b2252;">"dev"</span> <span style="color: #8b2252;">"sandbox"</span> <span style="color: #8b2252;">"acceptance"</span> <span style="color: #8b2252;">"dev"</span> <span style="color: #8b2252;">"int"</span> <span style="color: #8b2252;">"perf"</span> <span style="color: #8b2252;">"qa"</span> <span style="color: #8b2252;">"rc"</span> ...)
+</pre>
+</div>
+<ul class="org-ul">
+<li>Show ORG/SPACE names
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (<span style="color: #a020f0;">def</span> <span style="color: #a0522d;">all-spaces</span> (cf-spaces cf-login))
+#'<span style="color: #228b22;">user</span><span style="color: #000000; background-color: #ffffff;">/</span>all-spaces
+user&gt; (map (<span style="color: #a020f0;">fn</span> [space] (<span style="color: #a020f0;">let</span> [org-guid (cf-extract-entity-field <span style="color: #8b2252;">"organization_guid"</span> space)
+                             org (cf-org cf-login org-guid)
+                             org-name (cf-extract-name org)
+                             space-name (cf-extract-name space)]
+                         (<span style="color: #228b22;">clojure.string</span><span style="color: #000000; background-color: #ffffff;">/</span>join <span style="color: #8b2252;">"/"</span> [org-name space-name])))
+           all-spaces)
+(<span style="color: #8b2252;">"HUBS/dev"</span> <span style="color: #8b2252;">"HUBS/poc"</span> <span style="color: #8b2252;">"HUBS/qa"</span> <span style="color: #8b2252;">"HUBS/perf"</span> <span style="color: #8b2252;">"service.hubsservice@ge.com/dev"</span> <span style="color: #8b2252;">"HUBS/sandbox"</span> <span style="color: #8b2252;">"HUBS/acceptance"</span> <span style="color: #8b2252;">"hubsdev/dev"</span> <span style="color: #8b2252;">"hubsdev/int"</span> <span style="color: #8b2252;">"hubsdev/perf"</span> <span style="color: #8b2252;">"hubsdev/qa"</span> <span style="color: #8b2252;">"hubsdev/rc"</span> <span style="color: #8b2252;">"paepreprod/hubspreprod"</span> <span style="color: #8b2252;">"paeprod/hubsprod"</span> <span style="color: #8b2252;">"EASI/APM"</span>)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Filter a service by label, extract all plan names/guids.
+</li>
+<li>Manually filter by plan name
+</li>
+<li>List all service instances with a particular plan guid
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (map cf-extract-guid (cf-services cf-login <span style="color: #008b8b;">:q</span> {<span style="color: #8b2252;">"label"</span> <span style="color: #8b2252;">"postgres"</span>}))
+(<span style="color: #8b2252;">"809503e4-7d24-4d87-b0d9-b991662a049c"</span>)
+user&gt; (map cf-extract-name (cf-service-plans cf-login <span style="color: #8b2252;">"809503e4-7d24-4d87-b0d9-b991662a049c"</span>))
+(<span style="color: #8b2252;">"shared-nr"</span> <span style="color: #8b2252;">"Dedicated-R-Bronze"</span> <span style="color: #8b2252;">"Shared-R-Encrypted"</span>)
+user&gt; (<span style="color: #a020f0;">-&gt;&gt;</span> (cf-service-plans cf-login <span style="color: #8b2252;">"809503e4-7d24-4d87-b0d9-b991662a049c"</span>)
+          (filter (comp (partial = <span style="color: #8b2252;">"shared-nr"</span>) cf-extract-name))
+          first
+          cf-extract-guid)
+<span style="color: #8b2252;">"7c88632a-bdd4-465c-9856-0d4535fbd86c"</span>
+user&gt; (<span style="color: #a020f0;">def</span> <span style="color: #a0522d;">postgres-instances</span>
+        (cf-service-instances cf-login
+                              <span style="color: #008b8b;">:q</span> {<span style="color: #8b2252;">"service_plan_guid"</span> <span style="color: #8b2252;">"7c88632a-bdd4-465c-9856-0d4535fbd86c"</span>}))
+#'<span style="color: #228b22;">user</span><span style="color: #000000; background-color: #ffffff;">/</span>postgres-instances
+user&gt; (count postgres-instances)
+28
+user&gt; (count (cf-service-instances cf-login))
+448
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>List all domain names/guids
+</li>
+<li>Show poc's space guid
+</li>
+<li>Use domain and space guid to create a route
+</li>
+<li>Verify route exists
+</li>
+<li>Delete the route, verify
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (map (juxt cf-extract-guid cf-extract-name) (cf-shared-domains cf-login))
+([<span style="color: #8b2252;">"215d770e-4d37-4485-992c-5c453f566396"</span> <span style="color: #8b2252;">"run.asv-pr.ice.predix.io"</span>] [<span style="color: #8b2252;">"803c844b-52aa-40fd-97b7-4311290d7e07"</span> <span style="color: #8b2252;">"run.asv-pr-pub.ice.predix.io"</span>])
+user&gt; (map cf-extract-guid (cf-spaces cf-login <span style="color: #008b8b;">:q</span> {<span style="color: #8b2252;">"name"</span> <span style="color: #8b2252;">"poc"</span>}))
+(<span style="color: #8b2252;">"390807ae-647d-4b7a-96a9-05599abc186e"</span>)
+user&gt; (cf-route-create cf-login
+                       <span style="color: #8b2252;">"215d770e-4d37-4485-992c-5c453f566396"</span>
+                       <span style="color: #8b2252;">"390807ae-647d-4b7a-96a9-05599abc186e"</span>
+                       {<span style="color: #008b8b;">:host</span> <span style="color: #8b2252;">"cf-lib-test"</span>
+                        <span style="color: #008b8b;">:path</span> <span style="color: #8b2252;">"/some/path"</span>})
+{<span style="color: #8b2252;">"metadata"</span> {<span style="color: #8b2252;">"guid"</span> <span style="color: #8b2252;">"c951b309-958c-483e-ba0f-e7468ce3eebe"</span>, <span style="color: #8b2252;">"url"</span> <span style="color: #8b2252;">"/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe"</span>, <span style="color: #8b2252;">"created_at"</span> <span style="color: #8b2252;">"2016-08-24T05:21:08Z"</span>, <span style="color: #8b2252;">"updated_at"</span> <span style="color: #008b8b;">nil</span>}, <span style="color: #8b2252;">"entity"</span> {<span style="color: #8b2252;">"apps_url"</span> <span style="color: #8b2252;">"/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe/apps"</span>, <span style="color: #8b2252;">"host"</span> <span style="color: #8b2252;">"cf-lib-test"</span>, <span style="color: #8b2252;">"path"</span> <span style="color: #8b2252;">"/some/path"</span>, <span style="color: #8b2252;">"space_url"</span> <span style="color: #8b2252;">"/v2/spaces/390807ae-647d-4b7a-96a9-05599abc186e"</span>, <span style="color: #8b2252;">"service_instance_guid"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"domain_guid"</span> <span style="color: #8b2252;">"215d770e-4d37-4485-992c-5c453f566396"</span>, <span style="color: #8b2252;">"route_mappings_url"</span> <span style="color: #8b2252;">"/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe/route_mappings"</span>, <span style="color: #8b2252;">"space_guid"</span> <span style="color: #8b2252;">"390807ae-647d-4b7a-96a9-05599abc186e"</span>, <span style="color: #8b2252;">"port"</span> <span style="color: #008b8b;">nil</span>, <span style="color: #8b2252;">"domain_url"</span> <span style="color: #8b2252;">"/v2/domains/215d770e-4d37-4485-992c-5c453f566396"</span>}}
+user&gt; (<span style="color: #a020f0;">-&gt;&gt;</span> (cf-routes cf-login <span style="color: #008b8b;">:q</span> {<span style="color: #8b2252;">"host"</span> <span style="color: #8b2252;">"cf-lib-test"</span>})
+          count)
+1
+user&gt; (cf-route-delete cf-login <span style="color: #8b2252;">"c951b309-958c-483e-ba0f-e7468ce3eebe"</span>)
+{<span style="color: #008b8b;">:request-time</span> 836, <span style="color: #008b8b;">:repeatable?</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:streaming?</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:chunked?</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:cookies</span> {<span style="color: #8b2252;">"TS0164a009"</span> {<span style="color: #008b8b;">:discard</span> <span style="color: #008b8b;">true</span>, <span style="color: #008b8b;">:domain</span> <span style="color: #8b2252;">"predix.io"</span>, <span style="color: #008b8b;">:path</span> <span style="color: #8b2252;">"/"</span>, <span style="color: #008b8b;">:secure</span> <span style="color: #008b8b;">false</span>, <span style="color: #008b8b;">:value</span> <span style="color: #8b2252;">"0118c62c553502127eef5faa99eadc7723602e0e3db7496c1b7f469ea69f2a004e2fa0bea4"</span>, <span style="color: #008b8b;">:version</span> 0}}, <span style="color: #008b8b;">:headers</span> {<span style="color: #8b2252;">"Date"</span> <span style="color: #8b2252;">"Wed, 24 Aug 2016 05:23:07 GMT"</span>, <span style="color: #8b2252;">"X-Content-Type-Options"</span> <span style="color: #8b2252;">"nosniff"</span>, <span style="color: #8b2252;">"X-Vcap-Request-Id"</span> [<span style="color: #8b2252;">"32855895-75fa-482b-7a8b-8939bacaea09"</span> <span style="color: #8b2252;">"32855895-75fa-482b-7a8b-8939bacaea09::f130994a-9646-4519-b3ef-1dd83a1b357f"</span>], <span style="color: #8b2252;">"Connection"</span> <span style="color: #8b2252;">"close"</span>}, <span style="color: #008b8b;">:orig-content-encoding</span> <span style="color: #008b8b;">nil</span>, <span style="color: #008b8b;">:status</span> 204, <span style="color: #008b8b;">:length</span> 0, <span style="color: #008b8b;">:body</span> <span style="color: #008b8b;">nil</span>, <span style="color: #008b8b;">:trace-redirects</span> [<span style="color: #8b2252;">"https://api.system.asv-pr.ice.predix.io/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe"</span>]}
+user&gt; (<span style="color: #a020f0;">-&gt;&gt;</span> (cf-routes cf-login <span style="color: #008b8b;">:q</span> {<span style="color: #8b2252;">"host"</span> <span style="color: #8b2252;">"cf-lib-test"</span>})
+          count)
+0
+user&gt;
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

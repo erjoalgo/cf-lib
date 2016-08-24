@@ -1,0 +1,153 @@
+#+OPTIONS: ^:nil
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+#+OPTIONS: num:nil
+#+TITLE: cf-lib
+
+Clojure bindings for the cloudfoundry api.
+* Leiningen dependency
+#+BEGIN_SRC clojure
+[cf-lib "0.1.0-SNAPSHOT"]
+#+END_SRC
+
+* Sample usage
+- Define a cf login.
+- ~(use 'cf-lib.core)~
+#+BEGIN_SRC clojure
+;; Connected to nREPL server - nrepl://localhost:51182
+;; CIDER 0.13.0snapshot (package: 20160706.218), nREPL 0.2.12
+;; Clojure 1.8.0, Java 1.8.0_91
+;;     Docs: (doc function-name)
+;;           (find-doc part-of-name)
+;;   Source: (source function-name)
+;;  Javadoc: (javadoc java-object-or-class)
+;;     Exit: <C-c C-q>
+;;  Results: Stored in vars *1, *2, *3, an exception in *e;
+
+user> (def cf-login {
+                  :user "me@example.com"
+                  :pass "my-pass"
+                  :proxy {:host "my-proxy.ge.com"
+                          :port 8080}
+                  :api-endpoint "https://api.system.asv-pr.ice.predix.io"
+                  })
+#'user/cf-login
+user> (use 'cf-lib.core)
+nil
+#+END_SRC
+
+
+- Get all apps
+#+BEGIN_SRC clojure
+user> (def all-apps (cf-apps cf-login))
+token obtained: eyJhb...some-token
+#'user/all-apps
+user> (count all-apps)
+299
+user> (-> all-apps first keys)
+("metadata" "entity")
+user> (-> all-apps first)
+{"metadata" {"guid" "bdb9f729-fa47-4b09-ac09-fd28ca64da91", "url" "/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91", "created_at" "2016-02-17T19:01:23Z", "updated_at" "2016-03-10T00:33:25Z"}, "entity" {"detected_buildpack" "java-buildpack=v3.0-https://github.com/cloudfoundry/java-buildpack.git#3bd15e1 java-main open-jdk-jre=1.8.0_73 spring-auto-reconfiguration=1.10.0_RELEASE", "package_updated_at" "2016-03-03T22:20:36Z", "production" false, "command" nil, "package_state" "STAGED", "service_bindings_url" "/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/service_bindings", "health_check_timeout" nil, "diego" false, "space_url" "/v2/spaces/390807ae-647d-4b7a-96a9-05599abc186e", "disk_quota" 1024, "docker_credentials_json" {"redacted_message" "[PRIVATE DATA HIDDEN]"}, "buildpack" nil, "console" false, "name" "hubs-single-service-broker", "routes_url" "/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/routes", "health_check_type" "port", "debug" nil, "route_mappings_url" "/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/route_mappings", "space_guid" "390807ae-647d-4b7a-96a9-05599abc186e", "memory" 1024, "docker_image" nil, "detected_start_command" "SERVER_PORT=$PORT $PWD/.java-buildpack/open_jdk_jre/bin/java -cp $PWD/.:$PWD/.java-buildpack/spring_auto_reconfiguration/spring_auto_reconfiguration-1.10.0_RELEASE.jar -Djava.io.tmpdir=$TMPDIR -XX:OnOutOfMemoryError=$PWD/.java-buildpack/open_jdk_jre/bin/killjava.sh -Xmx768M -Xms768M -XX:MaxMetaspaceSize=104857K -XX:MetaspaceSize=104857K -Xss1M org.springframework.boot.loader.JarLauncher", "staging_failed_description" nil, "events_url" "/v2/apps/bdb9f729-fa47-4b09-ac09-fd28ca64da91/events", "state" "STARTED", "version" "ac039a0c-010f-43e1-b5be-84872e38341d", "enable_ssh" true, "staging_failed_reason" nil, "instances" 1, "stack_url" "/v2/stacks/cc01650c-bfcd-4d62-aae2-627e0859ae41", "staging_task_id" "2b6711f9354b4cdfbeca0f0a5c21ae83", "environment_json" {}, "stack_guid" "cc01650c-bfcd-4d62-aae2-627e0859ae41", "ports" nil}}
+#+END_SRC
+
+- Use cf api filter queries to filter by name
+#+BEGIN_SRC clojure
+user> (def cf-browser-apps (cf-apps cf-login :q {"name" "cf-browser"}))
+#'user/cf-browser-apps
+user> (count cf-browser-apps)
+3
+user> (cf-extract-guid (first cf-browser-apps))
+"52267073-53ac-4e6f-b61a-bbcfbea765ff"
+#+END_SRC
+
+- Show app envs
+- Set app envs
+- Verify new value
+#+BEGIN_SRC clojure
+user> (cf-app-envs cf-login "52267073-53ac-4e6f-b61a-bbcfbea765ff")
+{"staging_env_json" {}, "running_env_json" {}, "environment_json" {}, "system_env_json" {"VCAP_SERVICES" {}}, "application_env_json" {"VCAP_APPLICATION" {"application_id" "52267073-53ac-4e6f-b61a-bbcfbea765ff", "space_name" "dev", "space_id" "0942b30f-44fa-489f-a8f5-2a9ba785b4df", "name" "cf-browser", "application_version" "2c73b201-9be0-463b-ae07-2d997abc109b", "application_uris" [], "users" nil, "application_name" "cf-browser", "version" "2c73b201-9be0-463b-ae07-2d997abc109b", "uris" [], "limits" {"fds" 16384, "mem" 500, "disk" 1024}}}}
+user> (cf-app-envs-set cf-login "52267073-53ac-4e6f-b61a-bbcfbea765ff"
+                       {"sample-key-1" "val-1"
+                        "sample-key-2" "val-2"})
+{:request-time 1067, :repeatable? false, :streaming? true, :chunked? false, :cookies {"TS0164a009" {:discard true, :domain "predix.io", :path "/", :secure false, :value "0118c62c55c47af89214fb806e2e2cdce257f25e628adbd00f2985bc6d481386d6a825b250", :version 0}}, :headers {"Content-Length" "2758", "Content-Type" "application/json;charset=utf-8", "Date" "Wed, 24 Aug 2016 04:51:28 GMT", "X-Content-Type-Options" "nosniff", "X-Vcap-Request-Id" ["c23f7b6f-eeec-44cb-51e7-899328d61a7d" "c23f7b6f-eeec-44cb-51e7-899328d61a7d::e54acb34-e527-4003-95d1-eeebfcae3269"], "Connection" "close"}, :orig-content-encoding nil, :status 201, :length 2758, :body "{\n  \"metadata\": {\n    \"guid\": \"52267073-53ac-4e6f-b61a-bbcfbea765ff\",\n    \"url\": \"/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff\",\n    \"created_at\": \"2016-07-20T18:00:42Z\",\n    \"updated_at\": \"2016-08-24T04:51:28Z\"\n  },\n  \"entity\": {\n    \"name\": \"cf-browser\",\n    \"production\": false,\n    \"space_guid\": \"0942b30f-44fa-489f-a8f5-2a9ba785b4df\",\n    \"stack_guid\": \"cc01650c-bfcd-4d62-aae2-627e0859ae41\",\n    \"buildpack\": \"git://github.com/heroku/heroku-buildpack-clojure.git\",\n    \"detected_buildpack\": null,\n    \"environment_json\": {\n      \"staging_env_json\": {\n\n      },\n      \"running_env_json\": {\n\n      },\n      \"environment_json\": {      },\n      \"system_env_json\": {\n        \"VCAP_SERVICES\": {\n\n        }\n      },\n      \"application_env_json\": {\n        \"VCAP_APPLICATION\": {\n          \"application_id\": \"52267073-53ac-4e6f-b61a-bbcfbea765ff\",\n          \"space_name\": \"dev\",\n          \"space_id\": \"0942b30f-44fa-489f-a8f5-2a9ba785b4df\",\n          \"name\": \"cf-browser\",\n          \"application_version\": \"2c73b201-9be0-463b-ae07-2d997abc109b\",\n          \"application_uris\": [\n\n          ],\n          \"users\": null,\n          \"application_name\": \"cf-browser\",\n          \"version\": \"2c73b201-9be0-463b-ae07-2d997abc109b\",\n          \"uris\": [\n\n          ],\n          \"limits\": {\n            \"fds\": 16384,\n            \"mem\": 500,\n            \"disk\": 1024\n          }\n        }\n      },\n      \"sample-key-1\": \"val-1\",\n      \"sample-key-2\": \"val-2\"\n    },\n    \"memory\": 500,\n    \"instances\": 1,\n    \"disk_quota\": 1024,\n    \"state\": \"STOPPED\",\n    \"version\": \"2c73b201-9be0-463b-ae07-2d997abc109b\",\n    \"command\": null,\n    \"console\": false,\n    \"debug\": null,\n    \"staging_task_id\": null,\n    \"package_state\": \"FAILED\",\n    \"health_check_type\": \"port\",\n    \"health_check_timeout\": null,\n    \"staging_failed_reason\": \"StagingTimeExpired\",\n    \"staging_failed_description\": null,\n    \"diego\": false,\n    \"docker_image\": null,\n    \"package_updated_at\": null,\n    \"detected_start_command\": \"\",\n    \"enable_ssh\": false,\n    \"docker_credentials_json\": {\n      \"redacted_message\": \"[PRIVATE DATA HIDDEN]\"\n    },\n    \"ports\": null,\n    \"space_url\": \"/v2/spaces/0942b30f-44fa-489f-a8f5-2a9ba785b4df\",\n    \"stack_url\": \"/v2/stacks/cc01650c-bfcd-4d62-aae2-627e0859ae41\",\n    \"routes_url\": \"/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/routes\",\n    \"events_url\": \"/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/events\",\n    \"service_bindings_url\": \"/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/service_bindings\",\n    \"route_mappings_url\": \"/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff/route_mappings\"\n  }\n}", :trace-redirects ["https://api.system.asv-pr.ice.predix.io/v2/apps/52267073-53ac-4e6f-b61a-bbcfbea765ff"]}
+user> (cf-app-envs cf-login "52267073-53ac-4e6f-b61a-bbcfbea765ff")
+{"staging_env_json" {}, "running_env_json" {}, "environment_json" {"staging_env_json" {}, "running_env_json" {}, "environment_json" {}, "system_env_json" {"VCAP_SERVICES" {}}, "application_env_json" {"VCAP_APPLICATION" {"application_id" "52267073-53ac-4e6f-b61a-bbcfbea765ff", "space_name" "dev", "space_id" "0942b30f-44fa-489f-a8f5-2a9ba785b4df", "name" "cf-browser", "application_version" "2c73b201-9be0-463b-ae07-2d997abc109b", "application_uris" [], "users" nil, "application_name" "cf-browser", "version" "2c73b201-9be0-463b-ae07-2d997abc109b", "uris" [], "limits" {"fds" 16384, "mem" 500, "disk" 1024}}}, "sample-key-1" "val-1", "sample-key-2" "val-2"}, "system_env_json" {"VCAP_SERVICES" {}}, "application_env_json" {"VCAP_APPLICATION" {"application_id" "52267073-53ac-4e6f-b61a-bbcfbea765ff", "space_name" "dev", "space_id" "0942b30f-44fa-489f-a8f5-2a9ba785b4df", "name" "cf-browser", "application_version" "2c73b201-9be0-463b-ae07-2d997abc109b", "application_uris" [], "users" nil, "application_name" "cf-browser", "version" "2c73b201-9be0-463b-ae07-2d997abc109b", "uris" [], "limits" {"fds" 16384, "mem" 500, "disk" 1024}}}}
+user> (-> cf-login
+          (cf-app-envs "52267073-53ac-4e6f-b61a-bbcfbea765ff")
+          (get "environment_json")
+          (get "sample-key-1"))
+"val-1"
+
+#+END_SRC
+- Show names of all spaces 
+#+BEGIN_SRC clojure
+user> (->> (cf-spaces cf-login)
+           (map cf-extract-name))
+("dev" "poc" "qa" "perf" "dev" "sandbox" "acceptance" "dev" "int" "perf" "qa" "rc" ...)
+
+#+END_SRC
+- Show ORG/SPACE names
+#+BEGIN_SRC clojure
+user> (def all-spaces (cf-spaces cf-login))
+#'user/all-spaces
+user> (map (fn [space] (let [org-guid (cf-extract-entity-field "organization_guid" space)
+                             org (cf-org cf-login org-guid)
+                             org-name (cf-extract-name org)
+                             space-name (cf-extract-name space)]
+                         (clojure.string/join "/" [org-name space-name])))
+           all-spaces)
+("HUBS/dev" "HUBS/poc" "HUBS/qa" "HUBS/perf" "service.hubsservice@ge.com/dev" "HUBS/sandbox" "HUBS/acceptance" "hubsdev/dev" "hubsdev/int" "hubsdev/perf" "hubsdev/qa" "hubsdev/rc" "paepreprod/hubspreprod" "paeprod/hubsprod" "EASI/APM")
+
+#+END_SRC
+
+- Filter a service by label, extract all plan names/guids.
+- Manually filter by plan name
+- List all service instances with a particular plan guid
+#+BEGIN_SRC clojure
+user> (map cf-extract-guid (cf-services cf-login :q {"label" "postgres"}))
+("809503e4-7d24-4d87-b0d9-b991662a049c")
+user> (map cf-extract-name (cf-service-plans cf-login "809503e4-7d24-4d87-b0d9-b991662a049c"))
+("shared-nr" "Dedicated-R-Bronze" "Shared-R-Encrypted")
+user> (->> (cf-service-plans cf-login "809503e4-7d24-4d87-b0d9-b991662a049c")
+          (filter (comp (partial = "shared-nr") cf-extract-name))
+          first
+          cf-extract-guid)
+"7c88632a-bdd4-465c-9856-0d4535fbd86c"
+user> (def postgres-instances
+        (cf-service-instances cf-login
+                              :q {"service_plan_guid" "7c88632a-bdd4-465c-9856-0d4535fbd86c"}))
+#'user/postgres-instances
+user> (count postgres-instances)
+28
+user> (count (cf-service-instances cf-login))
+448
+
+#+END_SRC
+
+- List all domain names/guids
+- Show poc's space guid
+- Use domain and space guid to create a route
+- Verify route exists
+- Delete the route, verify
+#+BEGIN_SRC clojure
+user> (map (juxt cf-extract-guid cf-extract-name) (cf-shared-domains cf-login))
+(["215d770e-4d37-4485-992c-5c453f566396" "run.asv-pr.ice.predix.io"] ["803c844b-52aa-40fd-97b7-4311290d7e07" "run.asv-pr-pub.ice.predix.io"])
+user> (map cf-extract-guid (cf-spaces cf-login :q {"name" "poc"}))
+("390807ae-647d-4b7a-96a9-05599abc186e")
+user> (cf-route-create cf-login
+                       "215d770e-4d37-4485-992c-5c453f566396"
+                       "390807ae-647d-4b7a-96a9-05599abc186e"
+                       {:host "cf-lib-test"
+                        :path "/some/path"})
+{"metadata" {"guid" "c951b309-958c-483e-ba0f-e7468ce3eebe", "url" "/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe", "created_at" "2016-08-24T05:21:08Z", "updated_at" nil}, "entity" {"apps_url" "/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe/apps", "host" "cf-lib-test", "path" "/some/path", "space_url" "/v2/spaces/390807ae-647d-4b7a-96a9-05599abc186e", "service_instance_guid" nil, "domain_guid" "215d770e-4d37-4485-992c-5c453f566396", "route_mappings_url" "/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe/route_mappings", "space_guid" "390807ae-647d-4b7a-96a9-05599abc186e", "port" nil, "domain_url" "/v2/domains/215d770e-4d37-4485-992c-5c453f566396"}}
+user> (->> (cf-routes cf-login :q {"host" "cf-lib-test"})
+          count)
+1
+user> (cf-route-delete cf-login "c951b309-958c-483e-ba0f-e7468ce3eebe")
+{:request-time 836, :repeatable? false, :streaming? false, :chunked? false, :cookies {"TS0164a009" {:discard true, :domain "predix.io", :path "/", :secure false, :value "0118c62c553502127eef5faa99eadc7723602e0e3db7496c1b7f469ea69f2a004e2fa0bea4", :version 0}}, :headers {"Date" "Wed, 24 Aug 2016 05:23:07 GMT", "X-Content-Type-Options" "nosniff", "X-Vcap-Request-Id" ["32855895-75fa-482b-7a8b-8939bacaea09" "32855895-75fa-482b-7a8b-8939bacaea09::f130994a-9646-4519-b3ef-1dd83a1b357f"], "Connection" "close"}, :orig-content-encoding nil, :status 204, :length 0, :body nil, :trace-redirects ["https://api.system.asv-pr.ice.predix.io/v2/routes/c951b309-958c-483e-ba0f-e7468ce3eebe"]}
+user> (->> (cf-routes cf-login :q {"host" "cf-lib-test"})
+          count)
+0
+user> 
+#+END_SRC
+
