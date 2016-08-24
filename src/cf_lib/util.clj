@@ -13,11 +13,3 @@
                                proxy)]
                {:host host
                 :port (Integer/parseInt port)}))))
-
-(defmacro get-chain
-  "(get-chain {1 {2 {3 {4 5}}}} 1 2 3) => {4 5}"
-  [obj & accessors]
-  ;;the same can be accomplished without a macro:
-  ;;(reduce get {1 {2 {3 {4 5}}}} [1 2 3]) => {4 5}"
-  (if (empty? accessors) obj
-      `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))
