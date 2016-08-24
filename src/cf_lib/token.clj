@@ -3,10 +3,14 @@
    [clj-http.client :as client]
    [clojure.data.json :as json]
    [clojure.tools.logging :as log]
-   [cf-lib.util :refer [proxy-to-map current-time-secs]]
+   [cf-lib.util :refer [proxy-to-map]]
    ))
 
 (def min-token-refresh-secs 5)
+
+(defn current-time-secs []
+  "return the current time in seconds"
+  (-> (System/currentTimeMillis) (/ 1000) int))
 
 (defn cf-token [cf-target]
   "obtain a token given either (username password) or authorization-code"

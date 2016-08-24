@@ -21,7 +21,3 @@
   ;;(reduce get {1 {2 {3 {4 5}}}} [1 2 3]) => {4 5}"
   (if (empty? accessors) obj
       `(get-chain (get ~obj ~(first accessors)) ~@(rest accessors))))
-
-(defn current-time-secs []
-  "return the current time in seconds"
-  (-> (System/currentTimeMillis) (/ 1000) int))

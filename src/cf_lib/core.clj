@@ -3,7 +3,7 @@
    [clj-http.client :as client]
    [clojure.data.json :as json]
    [clojure.tools.logging :as log]
-   [cf-lib.util :refer [proxy-to-map current-time-secs]]
+   [cf-lib.util :refer [proxy-to-map]]
    [cf-lib.token :refer [token-for-cf-target!]]
    [clojure.walk :refer [stringify-keys]]
    )
