@@ -4,7 +4,8 @@
 #+OPTIONS: num:nil
 #+TITLE: cf-lib
 
-Clojure bindings for the cloudfoundry api.
+Clojure client library for Cloudfoundry
+
 * Leiningen dependency
 #+BEGIN_SRC clojure
 [cf-lib "0.1.0-SNAPSHOT"]
