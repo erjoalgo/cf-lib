@@ -149,6 +149,8 @@
                (format "/v2/apps/%s/env" app-guid))
       :body json/read-str))
 
+(def cf-get-envs cf-app-envs)
+
 (defn cf-app-envs-set
   "update existing app envs map with envs"
   [cf-target app-guid envs]

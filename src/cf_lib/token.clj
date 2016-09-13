@@ -17,7 +17,7 @@
   (log/infof "obtaining token for target: %s"  cf-target)
   (let [username (:user cf-target)
         password (:pass cf-target)
-        code (:code cf-target)
+        auth-code-login (:auth-code-login cf-target)
         login-endpoint (or (:uaa-endpoint cf-target)
                            (clojure.string/replace
                             (:api-endpoint cf-target)
@@ -33,18 +33,23 @@
                                 :form-params {:username username
                                               :password password
                                               :grant_type "password"}}
-                               code {:query-params
-                                     {"grant_type" "authorization_code"
-                                      "client_id" "login"
-                                      "client_secret" "loginsecret"
-                                      "response_type" "token"
-                                      "token_format" "opaque"
-                                      "code" code
-                                      "redirect_uri"
-                                      "http://localhost:1223/oauth/code-grant"}
-                                     :content-type
-                                     "application/x-www-form-urlencoded"
-                                     }
+                               auth-code-login
+                               (let [{:keys
+                                      [auth-code client-id client-secret
+                                       scopes redirect-uri]} auth-code-login]
+
+                                 {:query-params
+                                  {"grant_type" "authorization_code"
+                                   "client_id" client-id
+                                   "client_secret" client-secret
+                                   "response_type" "token"
+                                   ;"token_format" "opaque"
+                                   "code" auth-code
+                                   "scope" (clojure.string/join " " scopes)
+                                   "redirect_uri" redirect-uri}
+                                  :content-type
+                                  "application/x-www-form-urlencoded"
+                                  })
                                true (throw (Exception.
                                             "must provide user/pass or code")))
         resp (client/post token-url (merge req-params-common req-params-extra))
