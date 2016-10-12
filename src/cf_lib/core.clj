@@ -66,7 +66,7 @@
  cf-shared-domain)
 
 (cf-define-resource-all-delete
- [cf-app-bindings cf-app-binding-delete
+ [cf-app-bindings cf-service-binding-delete
   "delete all bindings for an app" ]
  [cf-service-instance-bindings cf-service-binding-delete
   "delete all bindings for a service instance"]
