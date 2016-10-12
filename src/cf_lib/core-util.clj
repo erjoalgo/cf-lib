@@ -35,6 +35,7 @@
            (if-not
                (and (< retry-count 2)
                     ;;TODO check if has .getData method
+                    (-> ex .getMessage (.startsWith "clj-http: status"))
                     (-> ex .getData :status (= 401)))
              (throw ex)
              (cf-curl cf-target path
